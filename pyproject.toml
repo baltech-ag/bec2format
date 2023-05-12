@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "bec2format"
+version = "0.00.01"
+description = "BALTECH BEC2 file format"
+authors = ["Baltech AG <info@baltech.de>"]
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.11"
+
+[tool.poetry.dev-dependencies]
+pytest = "*"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

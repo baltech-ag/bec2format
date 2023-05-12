@@ -1,0 +1,11 @@
+on:
+  pull_request:
+    types:
+      - opened
+    branches-ignore:
+      - 'dbg-**'
+      - 'rt-**'
+jobs:
+  jira-integration-pr:
+    uses: baltech-ag/ci-scripts/.github/workflows/jira_integration_pr.yml@master
+    secrets: inherit
