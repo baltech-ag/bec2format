@@ -114,19 +114,3 @@ class ConfigId:
     def __repr__(self) -> str:
         return 'ConfigId({0.customer}, {0.project}, {0.device}, {0.version}, {0.name!r})'\
             .format(self)
-
-
-if __name__ == '__main__':
-    assert str(ConfigId(1234, 567, 890, 5, "Testname")) == '01234-0567-0890-05 Testname'
-    assert str(ConfigId(1234, 567, 890, 5, None)) == '01234-0567-0890-05'
-    assert str(ConfigId(None, 6789, 3456, 8, "Testname")) == 'Testname (version 08)'
-    assert str(ConfigId(0, None, 0, 1, '')) == '00000-9999-0000-01'
-    assert ConfigId(12345, 6789, 3456, 78, 'Testname').cfgid_str == '12345-6789-3456-78'
-    assert ConfigId(12345, 6789, 3456, 78, 'Testname').is_baltech_naming_scheme
-    assert ConfigId(12345, 6789, 0, 78, 'Testname').is_device_settings
-    assert ConfigId(12345, 6789, 3456, 78, 'Testname') \
-           == ConfigId.create_from_str('12345-6789-3456-78 Testname')
-    assert ConfigId(12345, 6789, 3456, 78, None) \
-           == ConfigId.create_from_str('12345-6789-3456-78')
-    assert ConfigId(None, None, None, 12, 'NameOfConfig') \
-           == ConfigId.create_from_str('NameOfConfig (version 12)')

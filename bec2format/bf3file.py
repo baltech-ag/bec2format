@@ -596,26 +596,3 @@ class Bf3File(object):
             self.comments["RequiresBusAddress"] = "Yes"
         else:
             self.comments.pop("RequiresBusAddress", '')
-
-
-if __name__ == '__main__':
-    from io import StringIO
-    # ideally OrderedDicts are used instead of dicts for Bf3Files
-    bf3_file = Bf3File({"FirmwareId": '1053',
-                        "FirmwareVersion": "1.02.03",
-                        "LegicFwVersion": "123.43"},
-                       [Bf3Component({0xC1: buf("11 22 33"),
-                                      0xC3: buf("12 33")},
-                                     buf(list(range(0x100)))),
-                        Bf3Component({0xC4: buf("11")},
-                                     buf("23445356465347567567425234523"))])
-    bf3_file_obj = StringIO()
-    bf3_file.write_file(bf3_file_obj)
-    print(bf3_file_obj.getvalue())
-    bf3_file_obj.seek(0)
-    print(Bf3File.read_file(bf3_file_obj))
-
-    bf3_1100 = Bf3File.bf2_import(r"T:\bf2files\1100_id_engine_z_firmware_1_08_00.bf2")
-    bf3_1100.write_file(r'T:\bf2files\1100_id_engine_z_firmware_1_08_00.bf3')
-    bf3_1100_2 = Bf3File.read_file(r'T:\bf2files\1100_id_engine_z_firmware_1_08_00.bf3')
-    print((repr(bf3_1100_2)))
