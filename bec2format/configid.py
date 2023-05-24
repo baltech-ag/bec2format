@@ -1,12 +1,19 @@
 import re
 from typing import Any
 
+from .error import ConfigIdFormatError, MissingDeviceSettingsNameError, \
+    MissingProjectSettingsNameError
+
+
+ConfDict = dict[tuple[int, int | None], bytes]
+
 
 UNKNOWN = 9999
 
+
 class ConfigId:
 
-    def __init__(self, customer, project, device, version, name):
+    def __init__(self, customer: int | None, project: int | None, device: int | None, version: int | None, name: str | None):
         self.customer = customer if customer != UNKNOWN else None
         self.project = project if project != UNKNOWN else None
         self.device = device if device != UNKNOWN else None
@@ -14,40 +21,44 @@ class ConfigId:
         self.name = name
 
     @classmethod
-    def create_from_prj_settings(cls, config: dict) -> "ConfigId":
+    def create_from_prj_settings(cls, config: dict[tuple[int, int], bytes]) -> "ConfigId":
         try:
-            version = config[0x620, 0x07].readInt8()
+            version = int.from_bytes(config[0x620, 0x07], byteorder="big")
         except KeyError:
-            raise ValueError('This config does not contain its project settings version')
-        name = str(config[(0x620, 0x06)]) if (0x620, 0x06) in config else None
+            raise MissingProjectSettingsNameError(
+                'This config does not contain its project settings version')
+        name = config[(0x620, 0x06)].decode() if (0x620, 0x06) in config else None
         try:
-            customer = config[0x620, 0x01].readInt32()
-            project = config[0x620, 0x05].readInt16()
-            device = config.get((0x620, 0x02), bytes([0x00, 0x00])).readInt16()
+            customer = int.from_bytes(config[0x620, 0x01], byteorder="big")
+            project = int.from_bytes(config[0x620, 0x05], byteorder="big")
+            device = int.from_bytes(config.get((0x620, 0x02), bytes([0x00, 0x00])), byteorder="big")
         except KeyError:
             # Does not correspond to Baltech Naming Scheme
             customer = device = project = None
             if not name:
-                raise ValueError('name is required if not corresponding to '
-                                 'baltech naming convention')
+                raise MissingProjectSettingsNameError(
+                    'name is required if not corresponding to baltech naming '
+                    'convention')
         return cls(customer, project, device, version, name)
 
     @classmethod
-    def create_from_dev_settings(cls, config: dict) -> "ConfigId":
+    def create_from_dev_settings(cls, config: ConfDict) -> "ConfigId":
         try:
-            version = config[0x620, 0x04].readInt8()
+            version = int.from_bytes(config[0x620, 0x04], byteorder="big")
         except KeyError:
-            raise ValueError('This config does not contain its device settings name')
-        name = str(config[(0x620, 0x03)]) if (0x620, 0x03) in config else None
+            raise MissingDeviceSettingsNameError(
+                'This config does not contain its device settings name')
+        name = config[(0x620, 0x03)].decode() if (0x620, 0x03) in config else None
         try:
-            customer = config[0x620, 0x01].readInt32()
-            device = config.get((0x620, 0x02), bytes([0x00, 0x00])).readInt16()
+            customer = int.from_bytes(config[0x620, 0x01], byteorder="big")
+            device = int.from_bytes(config.get((0x620, 0x02), bytes([0x00, 0x00])), byteorder="big")
         except KeyError:
             # Does not correspond to Baltech Naming Scheme
             customer = device = None
             if not name:
-                raise ValueError('name is required if not corresponding to '
-                                 'baltech naming convention')
+                raise MissingDeviceSettingsNameError(
+                    'name is required if not corresponding to baltech naming '
+                    'convention')
         return cls(customer, 0000, device, version, name)
 
     @classmethod
@@ -70,7 +81,7 @@ class ConfigId:
                     version=int(mobj.group(2)),
                     name=str(mobj.group(1)))
             else:
-                raise ValueError('Invalid ConfigId string format: ' + configname)
+                raise ConfigIdFormatError('Invalid ConfigId string format: ' + configname)
 
     @property
     def is_device_settings(self) -> bool:
