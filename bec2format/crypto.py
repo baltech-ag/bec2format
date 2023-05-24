@@ -29,6 +29,14 @@ class PublicEccKey:
     def create_from_der_fmt(cls, der_fmt: bytes) -> "PublicEccKey":
         raise NotImplementedError()
 
+    @classmethod
+    def create_from_raw_fmt(cls, raw_fmt: bytes):
+        der_header = bytes.fromhex(
+            "30 59 30 13 06 07 2A 86 48 CE 3D 02 01 06 08 2A 86 48 CE 3D 03 01 "
+            "07 03 42 00 04"
+        )
+        return cls.create_from_der_fmt(der_header + raw_fmt)
+
     @abstractmethod
     def to_der_fmt(self) -> bytes:
         ...
@@ -94,6 +102,10 @@ def create_AES128(key: bytes, iv: bytes | None = None) -> __AES128:
 
 def create_public_ecc_key_from_der_fmt(der_fmt: bytes) -> __PublicEccKey:
     return __PublicEccKey.create_from_der_fmt(der_fmt)
+
+
+def create_public_ecc_key_from_raw_fmt(raw_fmt: bytes) -> __PublicEccKey:
+    return __PublicEccKey.create_from_raw_fmt(raw_fmt)
 
 
 def generate_private_ecc_key() -> __PrivateEccKey:

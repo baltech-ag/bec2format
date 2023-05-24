@@ -16,6 +16,7 @@ from bec2format.crypto import (
     PublicEccKey,
     create_AES128,
     create_public_ecc_key_from_der_fmt,
+    create_public_ecc_key_from_raw_fmt,
     generate_private_ecc_key,
 )
 from bec2format.error import Bec2FileFormatError
@@ -242,11 +243,7 @@ class EccDecryptor(EccEncryptor):
         if auth_block.read(1) != b"\x04":
             raise ValueError("Invalid encrypted ECC Block format")
         temp_publickey_raw = auth_block.read(64)
-        der_header = bytes.fromhex(
-            "30 59 30 13 06 07 2A 86 48 CE 3D 02 01 06 08 2A 86 48 CE 3D 03 01 07 03 42 00 04"
-        )
-        temp_publickey_der = der_header + temp_publickey_raw
-        temp_publickey = create_public_ecc_key_from_der_fmt(temp_publickey_der)
+        temp_publickey = create_public_ecc_key_from_raw_fmt(temp_publickey_raw)
         encrypted_session_key = auth_block.read(AES128.BLOCK_SIZE)
         ecdh_secret = self.private_key.compute_dh_secret(temp_publickey)
         ecdh_sha_secret = sha256(ecdh_secret).digest()
