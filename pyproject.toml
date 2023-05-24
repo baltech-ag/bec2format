@@ -9,6 +9,53 @@ python = ">=3.10,<3.11"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
+mypy = "*"
+black = "*"
+isort = "*"
+flake8 = "*"
+flake8-awesome = "*"
+flake8-simplify = "*"
+Flake8-pyproject = "*"
+types-invoke = "*"
+
+[tool.mypy]
+strict = true
+exclude = [
+  "appnotes/register_crypto_plugin/ecdsa/*",
+  "appnotes/register_crypto_plugin/pyaes/*",
+]
+
+[tool.isort]
+profile = "black"
+extend_skip_glob = [
+  "/appnotes/register_crypto_plugin/ecdsa/*",
+  "/appnotes/register_crypto_plugin/pyaes/*",
+]
+
+[tool.black]
+skip-magic-trailing-comma = true
+extend-exclude = "/appnotes/register_crypto_plugin/(ecdsa|pyaes)/"
+
+[tool.flake8]
+exclude = [
+  ".git",
+  ".github",
+  ".mypy_cache",
+  ".tox",
+  "__pycache__",
+  "appnotes/register_crypto_plugin/ecdsa",
+  "appnotes/register_crypto_plugin/pyaes",
+]
+ignore = [
+  # line too long handled by black
+  "E501",
+  # invoke not listed in dependencies
+  "I900",
+  # don`t use "[on_true] if [expression] else [on_false]" syntax
+  "IF100",
+  # line break before binary operator: collides with black
+  "W503",
+]
 
 [build-system]
 requires = ["poetry-core"]
