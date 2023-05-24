@@ -1,14 +1,14 @@
-from .pyaes import aes, blockfeeder
-from .ecdsa import SigningKey, VerifyingKey, ECDH, NIST256p
+from bec2format import AES128 as AES128Base
+from bec2format import PrivateEccKey as PrivateEccKeyBase
+from bec2format import PublicEccKey as PublicEccKeyBase
+from bec2format import register_AES128, register_PrivateEccKey, register_PublicEccKey
 
-from bec2format import AES128 as AES128Base, PublicEccKey as PublicEccKeyBase, \
-    PrivateEccKey as PrivateEccKeyBase, register_AES128, \
-    register_PublicEccKey, register_PrivateEccKey
+from .ecdsa import ECDH, NIST256p, SigningKey, VerifyingKey
+from .pyaes import aes, blockfeeder
 
 
 @register_AES128
 class AES128Proxy(AES128Base):
-
     def __init__(self, key: bytes, iv: bytes | None = None) -> None:
         super().__init__(key, iv)
         self._key = key
@@ -37,7 +37,6 @@ class AES128Proxy(AES128Base):
 
 @register_PublicEccKey
 class PublicEccKeyProxy(PublicEccKeyBase):
-
     def __init__(self, public_key: VerifyingKey) -> None:
         super().__init__()
         self.public_key = public_key
@@ -52,7 +51,6 @@ class PublicEccKeyProxy(PublicEccKeyBase):
 
 @register_PrivateEccKey
 class PrivateEccKeyProxy(PrivateEccKeyBase):
-
     CURVE = NIST256p  # SECP256R1
 
     def __init__(self, private_key: SigningKey) -> None:

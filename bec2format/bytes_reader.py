@@ -3,8 +3,12 @@ from typing import Type
 
 
 class BytesReader(BytesIO):
-
-    def __init__(self, raw: bytes, source: str | None = None, exception: Type[Exception] = ValueError) -> None:
+    def __init__(
+        self,
+        raw: bytes,
+        source: str | None = None,
+        exception: Type[Exception] = ValueError,
+    ) -> None:
         super().__init__(raw)
         self.length = len(raw)
         self.source = source
@@ -22,4 +26,4 @@ class BytesReader(BytesIO):
     def ensure_eof(self):
         if not self.eof():
             source = "" if self.source is None else " of " + str(self.source)
-            raise self.exception('Unexpected data at end' + source)
+            raise self.exception("Unexpected data at end" + source)

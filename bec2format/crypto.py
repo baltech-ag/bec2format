@@ -1,9 +1,8 @@
-from abc import abstractmethod, ABC
+from abc import ABC, abstractmethod
 from typing import Type
 
 
 class AES128(ABC):
-
     BLOCK_SIZE = 16
     KEY_SIZE = 16
 
@@ -25,7 +24,6 @@ class AES128(ABC):
 
 
 class PublicEccKey:
-
     @classmethod
     @abstractmethod
     def create_from_der_fmt(cls, der_fmt: bytes) -> "PublicEccKey":
@@ -42,7 +40,6 @@ class PublicEccKey:
 
 
 class PrivateEccKey:
-
     @classmethod
     @abstractmethod
     def create_from_der_fmt(cls, private_key_der_fmt: bytes) -> "PrivateEccKey":
