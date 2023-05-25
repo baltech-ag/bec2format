@@ -1,0 +1,5 @@
+/.idea/
+!/.idea/watcherTasks.xml
+/.tox/
+.mypy_cache/
+__pycache__/

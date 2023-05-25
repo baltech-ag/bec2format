@@ -1,0 +1,63 @@
+[tool.poetry]
+name = "bec2format"
+version = "0.01.00"
+description = "BALTECH BEC2 file format"
+authors = ["Baltech AG <info@baltech.de>"]
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.11"
+
+[tool.poetry.dev-dependencies]
+pytest = "*"
+mypy = "*"
+black = "*"
+isort = "*"
+flake8 = "*"
+flake8-awesome = "*"
+flake8-simplify = "*"
+Flake8-pyproject = "*"
+types-invoke = "*"
+
+[tool.mypy]
+exclude = [
+  "appnotes/register_crypto_plugin/ecdsa/*",
+  "appnotes/register_crypto_plugin/pyaes/*",
+]
+
+[tool.isort]
+profile = "black"
+extend_skip_glob = [
+  "/appnotes/register_crypto_plugin/ecdsa/*",
+  "/appnotes/register_crypto_plugin/pyaes/*",
+]
+
+[tool.black]
+skip-magic-trailing-comma = true
+extend-exclude = "/appnotes/register_crypto_plugin/(ecdsa|pyaes)/"
+
+[tool.flake8]
+exclude = [
+  ".git",
+  ".github",
+  ".mypy_cache",
+  ".tox",
+  "__pycache__",
+  "appnotes/register_crypto_plugin/ecdsa",
+  "appnotes/register_crypto_plugin/pyaes",
+]
+ignore = [
+  # line too long handled by black
+  "E501",
+  # invoke not listed in dependencies
+  "I900",
+  # don`t use "[on_true] if [expression] else [on_false]" syntax
+  "IF100",
+  # line break before binary operator: collides with black
+  "W503",
+  # whitespace before ':'
+  "E203",
+]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
