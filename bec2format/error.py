@@ -10,11 +10,11 @@ class Bf3FileFormatError(FormatError):
     pass
 
 
-class UnsupportedBf2Instr(Bf3FileFormatError):
+class UnsupportedBf2InstrError(Bf3FileFormatError):
     pass
 
 
-class UnsupportedTagType(Bf3FileFormatError):
+class UnsupportedTagTypeError(Bf3FileFormatError):
     pass
 
 

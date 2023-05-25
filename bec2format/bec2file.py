@@ -68,6 +68,11 @@ class Encryptor:
         return "{0.__class__.__name__}(...)".format(self)
 
 
+class KeySelectorEncryptor(Encryptor):
+    def __init__(self, key_selector: int) -> None:
+        self.key_selector = key_selector
+
+
 class AesEncryptorMixin(Encryptor):
     """
     AES Encryption Logic that simulates the crypto container format
@@ -162,7 +167,7 @@ class SoftwareCustKeyEncryptor(AesEncryptorMixin, CustKeyEncryptor):
         return bytes(plaintext)
 
 
-class EccEncryptor(Encryptor):
+class EccEncryptor(KeySelectorEncryptor):
     """
     Standard encryptor for ECC
 
@@ -208,8 +213,7 @@ class EccEncryptor(Encryptor):
     def __init__(
         self, key_selector: int = KEYSEL_FW_STD, public_key: PublicEccKey | None = None
     ) -> None:
-        super().__init__()
-        self.key_selector = key_selector
+        super().__init__(key_selector)
         self.public_key = public_key or create_public_ecc_key_from_der_fmt(
             self.DEFAULT_PUBLIC_KEYS[key_selector]
         )
@@ -340,7 +344,9 @@ class InitEccAuthBlock(AuthBlock):
         self.key_selector = key_selector
 
     def pack(
-        self, session_key: bytes, ext_encryptors: list[Encryptor] | None = None
+        self,
+        session_key: bytes,
+        ext_encryptors: list[KeySelectorEncryptor] | None = None,
     ) -> bytes:
         encryptor = self.select_encryptor(
             ext_encryptors,
@@ -353,7 +359,7 @@ class InitEccAuthBlock(AuthBlock):
 
     @classmethod
     def unpack(
-        cls, raw: bytes, ext_encryptors: list[Encryptor] | None = None
+        cls, raw: bytes, ext_encryptors: list[KeySelectorEncryptor] | None = None
     ) -> tuple[AuthBlock, bytes]:
         key_selector = raw[0]
         encryptor = cls.select_encryptor(

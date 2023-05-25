@@ -4,6 +4,7 @@ from .bec2file import (
     ConfigSecurityCodeEncryptor,
     CustKeyEncryptor,
     EccDecryptor,
+    EccEncryptor,
     Encryptor,
     SoftwareCustKeyEncryptor,
 )

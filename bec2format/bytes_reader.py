@@ -14,16 +14,16 @@ class BytesReader(BytesIO):
         self.source = source
         self.exception = exception
 
-    def read_int(self, num_bytes):
+    def read_int(self, num_bytes: int) -> int:
         return int.from_bytes(self.read(num_bytes), byteorder="big")
 
     def write(self, *args, **kwargs):
         raise self.exception("BytesReader() instance is not writable")
 
-    def eof(self):
+    def eof(self) -> bool:
         return self.tell() == self.length
 
-    def ensure_eof(self):
+    def ensure_eof(self) -> None:
         if not self.eof():
             source = "" if self.source is None else " of " + str(self.source)
-            raise self.exception("Unexpected data at end" + source)
+            raise self.exception(f"Unexpected data at end {source}")

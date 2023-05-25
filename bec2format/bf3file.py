@@ -11,9 +11,9 @@ from bec2format.error import (
     Bf3FileFormatError,
     MissingDeviceSettingsNameError,
     MissingProjectSettingsNameError,
-    UnsupportedBf2Instr,
+    UnsupportedBf2InstrError,
     UnsupportedLegacyFirmwareError,
-    UnsupportedTagType,
+    UnsupportedTagTypeError,
 )
 from bec2format.hwcids import HWCID_MAP, REV_HWCID_MAP
 
@@ -38,11 +38,11 @@ MAX_TLVBLOCK_SIZE = (
 )  # maximum size of a single unencrypted TLV block. During encryption up to 10 bytes may be added
 
 
-def conf_dict_to_tlv(confDict: ConfDict) -> list[bytes]:
+def conf_dict_to_tlv(conf_dict: ConfDict) -> list[bytes]:
     """Converts a configuration Dictionary into a list of TLV blocks."""
 
     # create sorted list of tuples Key, Value, Content (conf_list)
-    conf_list = conf_dict_to_list(confDict)
+    conf_list = conf_dict_to_list(conf_dict)
     # convert entries of conf_list into TLV parts (tuples Preface, Data, Postface)
     tlv_parts = []
     for key, value, content in conf_list:
@@ -490,7 +490,7 @@ class Bf3File:
 
     @classmethod
     def parse_bf2_file(cls, bf2fileobj: TextIO) -> Iterator[tuple[str, Any]]:
-        fwdata = []
+        fwdata: list[Bf2BinLine] = []
         for line in bf2fileobj:
             if line.startswith(":"):
                 rdata = hex2bin(line)
@@ -553,9 +553,10 @@ class Bf3File:
                 fwid_buf = int(bf3comments["FirmwareId"]).to_bytes(
                     2, byteorder="big"
                 ) + bytes(list(map(int, bf3comments["FirmwareVersion"].split("."))))
-                if bf3desc[BF3TAG.TYPE] == bytes([BF3TYPE.LOADER]):
-                    bf3desc[BF3TAG.FWVER] = fwid_buf
-                elif bf3desc[BF3TAG.TYPE] == bytes([BF3TYPE.MAIN]):
+                if bf3desc[BF3TAG.TYPE] in (
+                    bytes([BF3TYPE.LOADER]),
+                    bytes([BF3TYPE.MAIN]),
+                ):
                     bf3desc[BF3TAG.FWVER] = fwid_buf
         if "Creator" in bf2_instrs:
             bf3comments["Creator"] = bf2_instrs["Creator"] + " + bf2-to-bf3-converter"
@@ -565,7 +566,7 @@ class Bf3File:
             protocol = bf2_instrs["SELECT_IF"]["PROTOCOL"]
             if protocol != "*":
                 if protocol not in BF2_INTERFACES:
-                    raise UnsupportedBf2Instr()
+                    raise UnsupportedBf2InstrError()
                 bf3desc[BF3TAG.INTF] = BF2_INTERFACES[protocol].to_bytes(
                     1, byteorder="big"
                 )
@@ -602,7 +603,7 @@ class Bf3File:
 
     @staticmethod
     def bf2_unpack_payload(bf2lines: list[Bf2BinLine]) -> dict[int, bytes]:
-        blocks = {}
+        blocks: dict[int, bytes] = {}
         start_tagtype = bf2lines[0].fwtagtype
         cur_block_start_adr = None
         cur_block_end_adr = 0
@@ -664,7 +665,7 @@ class Bf3File:
         def emit_bf3comp():
             fwtagtype = bf2_fwdata[0].fwtagtype
             if fwtagtype not in BF2_TAGTYPE_MAP:
-                raise UnsupportedTagType(
+                raise UnsupportedTagTypeError(
                     "TagType 0x{:02X} is not recognized by ConfigEditor".format(
                         fwtagtype
                     )
@@ -682,7 +683,7 @@ class Bf3File:
                 desc[BF3TAG.INTF] = interface.to_bytes(1, byteorder="big")
             try:
                 cls.exec_bf2instrs(bf2_instrs, desc, comments)
-            except UnsupportedBf2Instr:
+            except UnsupportedBf2InstrError:
                 pass
             except (ValueError, IndexError, KeyError):
                 raise Bf3FileFormatError("Invalid BF2 Instruction")
