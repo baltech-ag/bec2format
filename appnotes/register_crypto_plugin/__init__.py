@@ -9,7 +9,7 @@ from .pyaes import aes, blockfeeder
 
 @register_AES128
 class AES128Proxy(AES128Base):
-    def __init__(self, key: bytes, iv: bytes | None = None) -> None:
+    def __init__(self, key: bytes, iv: Optional[bytes] = None) -> None:
         super().__init__(key, iv)
         self._key = key
         self._iv = iv
@@ -71,6 +71,6 @@ class PrivateEccKeyProxy(PrivateEccKeyBase):
 
     def compute_dh_secret(self, public_key: PublicEccKeyBase) -> bytes:
         ecdh = ECDH(curve=self.CURVE)
-        ecdh.load_private_key_der(self.private_key.to_der())
-        ecdh.load_received_public_key_der(public_key.to_der_fmt())
+        ecdh.load_private_key_der(self.private_key.to_der())  # type: ignore
+        ecdh.load_received_public_key_der(public_key.to_der_fmt())  # type: ignore
         return ecdh.generate_sharedsecret_bytes()

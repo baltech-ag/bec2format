@@ -1,7 +1,6 @@
 from hashlib import sha256
 from io import BytesIO
-from random import randbytes
-from typing import Callable, Iterable, TextIO
+from typing import Callable, Iterable, Optional, TextIO, Type
 
 from bec2format.bf3file import Bf3File
 from bec2format.bytes_reader import BytesReader
@@ -138,8 +137,8 @@ class SoftwareCustKeyEncryptor(AesEncryptorMixin, CustKeyEncryptor):
     def __init__(
         self,
         crypto_key: bytes,
-        customer_key: bytes | None = None,
-        customer_key_pos: int | None = None,
+        customer_key: Optional[bytes] = None,
+        customer_key_pos: Optional[int] = None,
     ) -> None:
         super().__init__(crypto_key)
         self.crypto_key = crypto_key
@@ -211,7 +210,9 @@ class EccEncryptor(KeySelectorEncryptor):
     }
 
     def __init__(
-        self, key_selector: int = KEYSEL_FW_STD, public_key: PublicEccKey | None = None
+        self,
+        key_selector: int = KEYSEL_FW_STD,
+        public_key: Optional[PublicEccKey] = None,
     ) -> None:
         super().__init__(key_selector)
         self.public_key = public_key or create_public_ecc_key_from_der_fmt(
@@ -272,15 +273,15 @@ class ConfigSecurityCodeEncryptor(AesEncryptorMixin, Encryptor):
 
 
 class AuthBlock:
-    TAG: int | None = None
-    REQUIRED_ENCRYPTOR_CLS: Encryptor | None = None
+    TAG: Optional[int] = None
+    REQUIRED_ENCRYPTOR_CLS: Type[Encryptor] = Encryptor
 
     @classmethod
     def select_encryptor(
         cls,
-        ext_encryptors: list[Encryptor] | None = None,
-        fallback_encryptor: Encryptor | None = None,
-        encryptor_filter: Callable[[Encryptor], bool] | None = None,
+        ext_encryptors: Iterable[Encryptor] = (),
+        fallback_encryptor: Optional[Encryptor] = None,
+        encryptor_filter: Optional[Callable[[Encryptor], bool]] = None,
     ) -> Encryptor:
         for encryptor in ext_encryptors or []:
             if isinstance(encryptor, cls.REQUIRED_ENCRYPTOR_CLS):
@@ -296,17 +297,17 @@ class AuthBlock:
             else:
                 return fallback_encryptor
 
-    def __init__(self, tag: int | None = None) -> None:
+    def __init__(self, tag: Optional[int] = None) -> None:
         self.tag = self.TAG or tag
 
     def pack(
-        self, session_key: bytes, ext_encryptors: list[Encryptor] | None = None
+        self, session_key: bytes, ext_encryptors: Iterable[Encryptor] = ()
     ) -> bytes:
         raise NotImplementedError()
 
     @classmethod
     def unpack(
-        cls, raw: bytes, ext_encryptors: list[Encryptor] | None = None
+        cls, raw: bytes, ext_encryptors: Iterable[Encryptor] = ()
     ) -> tuple["AuthBlock", bytes]:
         raise NotImplementedError()
 
@@ -318,14 +319,14 @@ class InitCustKeyAuthBlock(AuthBlock):
     CUSTOMER_KEY_PLACEHOLDER = bytes([0x00] * 10)
 
     def pack(
-        self, session_key: bytes, ext_encryptors: list[Encryptor] | None = None
+        self, session_key: bytes, ext_encryptors: Iterable[Encryptor] = ()
     ) -> bytes:
         auth_block = self.CUSTOMER_KEY_PLACEHOLDER + session_key
         return self.select_encryptor(ext_encryptors).encrypt(auth_block)
 
     @classmethod
     def unpack(
-        cls, raw: bytes, ext_encryptors: list[Encryptor] | None = None
+        cls, raw: bytes, ext_encryptors: Iterable[Encryptor] = ()
     ) -> tuple[AuthBlock, bytes]:
         auth_block = cls.select_encryptor(ext_encryptors).decrypt(raw)
         session_key = auth_block[-AES128.BLOCK_SIZE :]
@@ -344,9 +345,7 @@ class InitEccAuthBlock(AuthBlock):
         self.key_selector = key_selector
 
     def pack(
-        self,
-        session_key: bytes,
-        ext_encryptors: list[KeySelectorEncryptor] | None = None,
+        self, session_key: bytes, ext_encryptors: Iterable[KeySelectorEncryptor] = ()
     ) -> bytes:
         encryptor = self.select_encryptor(
             ext_encryptors,
@@ -359,7 +358,7 @@ class InitEccAuthBlock(AuthBlock):
 
     @classmethod
     def unpack(
-        cls, raw: bytes, ext_encryptors: list[KeySelectorEncryptor] | None = None
+        cls, raw: bytes, ext_encryptors: Iterable[KeySelectorEncryptor] = ()
     ) -> tuple[AuthBlock, bytes]:
         key_selector = raw[0]
         encryptor = cls.select_encryptor(
@@ -382,7 +381,7 @@ class UpdateAuthBlock(AuthBlock):
         self.config_security_code = config_security_code
 
     def pack(
-        self, session_key: bytes, ext_encryptors: list[Encryptor] | None = None
+        self, session_key: bytes, ext_encryptors: Iterable[Encryptor] = ()
     ) -> bytes:
         default_encryptor = ConfigSecurityCodeEncryptor(self.config_security_code)
         encryptor = self.select_encryptor(ext_encryptors, default_encryptor)
@@ -391,7 +390,7 @@ class UpdateAuthBlock(AuthBlock):
 
     @classmethod
     def unpack(
-        cls, raw: bytes, ext_encryptors: list[Encryptor] | None = None
+        cls, raw: bytes, ext_encryptors: Iterable[Encryptor] = ()
     ) -> tuple[AuthBlock, bytes]:
         encryptor: ConfigSecurityCodeEncryptor = cls.select_encryptor(ext_encryptors)  # type: ignore
         auth_block = BytesReader(encryptor.decrypt(raw), cls.__name__)
@@ -409,13 +408,13 @@ class UnknownAuthBlock(AuthBlock):
         self.binary_value = binary_value
 
     def pack(
-        self, session_key: bytes, ext_encryptors: list[Encryptor] | None = None
+        self, session_key: bytes, ext_encryptors: Iterable[Encryptor] = ()
     ) -> bytes:
         return self.binary_value
 
     @classmethod
     def unpack(
-        cls, raw: bytes, ext_encryptors: list[Encryptor] | None = None
+        cls, raw: bytes, ext_encryptors: Iterable[Encryptor] = ()
     ) -> tuple[AuthBlock, bytes]:
         raise Bec2FileFormatError("Cannot unpack unknown auth block")
 
@@ -424,7 +423,7 @@ class UnknownAuthBlock(AuthBlock):
 
 
 class Bec2File:
-    AUTH_BLOCK_CLS_MAP = {
+    AUTH_BLOCK_CLS_MAP: dict[int, AuthBlock] = {
         c.TAG: c for c in [InitCustKeyAuthBlock, InitEccAuthBlock, UpdateAuthBlock]
     }
 
@@ -432,7 +431,7 @@ class Bec2File:
         self,
         bf3file: Bf3File,
         auth_blocks: Iterable[AuthBlock] = (),
-        session_key: bytes | None = None,
+        session_key: Optional[bytes] = None,
     ):
         self.bf3file = bf3file
         self.auth_blocks = {block.tag: block for block in auth_blocks}
@@ -441,18 +440,18 @@ class Bec2File:
     def add_auth_block(self, auth_block: AuthBlock) -> None:
         self.auth_blocks[auth_block.tag] = auth_block
 
-    def to_binary(self, ext_encryptors: list[Encryptor] | None = None) -> bytes:
+    def to_binary(self, ext_encryptors: Iterable[Encryptor] = ()) -> bytes:
         header = BEC2_FILE_SIG + self.pack_auth_blocks(ext_encryptors)
         return header + self.bf3file.to_binary(len(header), self.session_key)
 
     def write_file(
-        self, bf3file: str | TextIO, ext_encryptors: list[Encryptor] | None = None
+        self, bf3file: str | TextIO, ext_encryptors: Iterable[Encryptor] = ()
     ) -> None:
         self.bf3file.write_bf3_format(
             bf3file, self.bf3file.comments, self.to_binary(ext_encryptors)
         )
 
-    def pack_auth_blocks(self, ext_encryptors: list[Encryptor] | None = None) -> bytes:
+    def pack_auth_blocks(self, ext_encryptors: Iterable[Encryptor] = ()) -> bytes:
         packed_auth_blocks = bytes()
         for auth_block in self.auth_blocks.values():
             auth_block_raw = auth_block.pack(self.session_key, ext_encryptors)
@@ -467,7 +466,7 @@ class Bec2File:
     def read_file(
         cls,
         bf3file: str | TextIO,
-        ext_encryptors: list[Encryptor] | None = None,
+        ext_encryptors: Iterable[Encryptor] = (),
         check_cmac: bool = True,
     ) -> "Bec2File":
         raw_rdr, comments = Bf3File.parse_bf3_file(bf3file)
@@ -487,8 +486,8 @@ class Bec2File:
 
     @classmethod
     def unpack_auth_blocks(
-        cls, raw_rdr: BytesIO, ext_encryptors: list[Encryptor]
-    ) -> tuple[Iterable[AuthBlock], bytes | None]:
+        cls, raw_rdr: BytesIO, ext_encryptors: Iterable[Encryptor]
+    ) -> tuple[Iterable[AuthBlock], Optional[bytes]]:
         common_session_key = None
         auth_blocks = []
         while True:

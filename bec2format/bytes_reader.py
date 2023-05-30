@@ -1,12 +1,12 @@
 from io import BytesIO
-from typing import Type
+from typing import Optional, Type
 
 
 class BytesReader(BytesIO):
     def __init__(
         self,
         raw: bytes,
-        source: str | None = None,
+        source: Optional[str] = None,
         exception: Type[Exception] = ValueError,
     ) -> None:
         super().__init__(raw)
