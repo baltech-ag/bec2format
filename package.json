@@ -1,0 +1,46 @@
+{
+  "name": "bec2format",
+  "description": "BALTECH BEC2 file format",
+  "version": "0.01.00",
+  "authors": [
+    "Baltech AG <info@baltech.de>"
+  ],
+  "urls": [
+    [
+      "bec2format/bec2file.py",
+      "github:baltech-ag/bec2format/bec2format/bec2file.py"
+    ],
+    [
+      "bec2format/bf3file.py",
+      "github:baltech-ag/bec2format/bec2format/bf3file.py"
+    ],
+    [
+      "bec2format/bytes_reader.py",
+      "github:baltech-ag/bec2format/bec2format/bytes_reader.py"
+    ],
+    [
+      "bec2format/compatibility.py",
+      "github:baltech-ag/bec2format/bec2format/compatibility.py"
+    ],
+    [
+      "bec2format/configid.py",
+      "github:baltech-ag/bec2format/bec2format/configid.py"
+    ],
+    [
+      "bec2format/crypto.py",
+      "github:baltech-ag/bec2format/bec2format/crypto.py"
+    ],
+    [
+      "bec2format/error.py",
+      "github:baltech-ag/bec2format/bec2format/error.py"
+    ],
+    [
+      "bec2format/hwcids.py",
+      "github:baltech-ag/bec2format/bec2format/hwcids.py"
+    ],
+    [
+      "bec2format/__init__.py",
+      "github:baltech-ag/bec2format/bec2format/__init__.py"
+    ]
+  ]
+}
