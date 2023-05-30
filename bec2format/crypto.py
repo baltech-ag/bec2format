@@ -68,6 +68,10 @@ class PrivateEccKey:
         ...
 
 
+def random_bytes(num_bytes: int) -> bytes:
+    raise NotImplementedError()
+
+
 def pad(data: bytes) -> bytes:
     pad_length = -len(data) % __AES128.BLOCK_SIZE
     return data + bytes([0x00] * pad_length)
@@ -76,6 +80,7 @@ def pad(data: bytes) -> bytes:
 __AES128: Type[AES128] = AES128
 __PublicEccKey: Type[PublicEccKey] = PublicEccKey
 __PrivateEccKey: Type[PrivateEccKey] = PrivateEccKey
+__random_bytes: Type[random_bytes] = random_bytes
 
 
 def register_AES128(impl: Type[__AES128]) -> Type[__AES128]:
@@ -96,6 +101,12 @@ def register_PrivateEccKey(impl: Type[__PrivateEccKey]) -> Type[__PrivateEccKey]
     return __PrivateEccKey
 
 
+def register_random_bytes(impl: Type[__random_bytes]) -> Type[__random_bytes]:
+    global __random_bytes
+    __random_bytes = impl
+    return __random_bytes
+
+
 def create_AES128(key: bytes, iv: Optional[bytes] = None) -> __AES128:
     return __AES128(key, iv)
 
@@ -110,3 +121,7 @@ def create_public_ecc_key_from_raw_fmt(raw_fmt: bytes) -> __PublicEccKey:
 
 def generate_private_ecc_key() -> __PrivateEccKey:
     return __PrivateEccKey.generate()
+
+
+def random_bytes(num_bytes: int) -> bytes:
+    return __random_bytes(num_bytes)

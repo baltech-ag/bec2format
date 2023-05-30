@@ -17,6 +17,7 @@ from bec2format.crypto import (
     create_public_ecc_key_from_der_fmt,
     create_public_ecc_key_from_raw_fmt,
     generate_private_ecc_key,
+    random_bytes,
 )
 from bec2format.error import Bec2FileFormatError
 
@@ -435,7 +436,7 @@ class Bec2File:
     ):
         self.bf3file = bf3file
         self.auth_blocks = {block.tag: block for block in auth_blocks}
-        self.session_key = session_key or randbytes(16)
+        self.session_key = session_key or random_bytes(16)
 
     def add_auth_block(self, auth_block: AuthBlock) -> None:
         self.auth_blocks[auth_block.tag] = auth_block
