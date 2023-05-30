@@ -1,7 +1,14 @@
+import os
+
 from bec2format import AES128 as AES128Base
 from bec2format import PrivateEccKey as PrivateEccKeyBase
 from bec2format import PublicEccKey as PublicEccKeyBase
-from bec2format import register_AES128, register_PrivateEccKey, register_PublicEccKey
+from bec2format import (
+    register_AES128,
+    register_PrivateEccKey,
+    register_PublicEccKey,
+    register_random_bytes,
+)
 
 from .ecdsa import ECDH, NIST256p, SigningKey, VerifyingKey
 from .pyaes import aes, blockfeeder
@@ -74,3 +81,8 @@ class PrivateEccKeyProxy(PrivateEccKeyBase):
         ecdh.load_private_key_der(self.private_key.to_der())  # type: ignore
         ecdh.load_received_public_key_der(public_key.to_der_fmt())  # type: ignore
         return ecdh.generate_sharedsecret_bytes()
+
+
+@register_random_bytes
+def random_bytes(num_bytes: int) -> bytes:
+    return os.urandom(num_bytes)

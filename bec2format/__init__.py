@@ -17,9 +17,11 @@ from .crypto import (
     create_AES128,
     create_public_ecc_key_from_der_fmt,
     generate_private_ecc_key,
+    random_bytes,
     register_AES128,
     register_PrivateEccKey,
     register_PublicEccKey,
+    register_random_bytes,
 )
 from .error import (
     Bec2FileFormatError,
