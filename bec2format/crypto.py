@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Type
+from typing import Optional, Type
 
 
 class AES128(ABC):
@@ -7,7 +7,7 @@ class AES128(ABC):
     KEY_SIZE = 16
 
     @abstractmethod
-    def __init__(self, key: bytes, iv: bytes | None = None) -> None:
+    def __init__(self, key: bytes, iv: Optional[bytes] = None) -> None:
         ...
 
     @abstractmethod
@@ -96,7 +96,7 @@ def register_PrivateEccKey(impl: Type[__PrivateEccKey]) -> Type[__PrivateEccKey]
     return __PrivateEccKey
 
 
-def create_AES128(key: bytes, iv: bytes | None = None) -> __AES128:
+def create_AES128(key: bytes, iv: Optional[bytes] = None) -> __AES128:
     return __AES128(key, iv)
 
 

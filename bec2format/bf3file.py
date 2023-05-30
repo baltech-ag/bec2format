@@ -1,8 +1,7 @@
 from binascii import unhexlify
 from collections import namedtuple
-from collections.abc import Iterator
 from re import sub
-from typing import Any, TextIO
+from typing import Any, Iterable, Iterator, Optional, TextIO
 
 from bec2format.bytes_reader import BytesReader
 from bec2format.configid import ConfDict, ConfigId
@@ -29,7 +28,7 @@ def hex2bin(hex_value: str) -> bytes:
     return unhexlify(clean_hex_str)
 
 
-def cmac(data: bytes, key: bytes, iv: bytes | None = None) -> bytes:
+def cmac(data: bytes, key: bytes, iv: Optional[bytes] = None) -> bytes:
     return create_AES128(key, iv).mac(data)
 
 
@@ -237,7 +236,7 @@ class Bf3Component:
         self,
         description: dict,
         blob: bytes,
-        actual_len: int | None = None,
+        actual_len: Optional[int] = None,
         encrypt_by_session_key: bool = False,
     ) -> None:
         self.description = description
@@ -250,7 +249,7 @@ class Bf3Component:
         cls,
         description: dict,
         raw_data: bytes,
-        actual_len: int | None,
+        actual_len: Optional[int],
         session_key: bytes,
     ) -> "Bf3Component":
         session_cipher = create_AES128(session_key)
@@ -283,10 +282,10 @@ class Bf3Component:
 
 class Bf3File:
     def __init__(
-        self, comments: dict | None = None, components: list[Bf3Component] | None = None
+        self, comments: Optional[dict] = None, components: Iterable[Bf3Component] = ()
     ) -> None:
         self.comments = comments or {}
-        self.components = components or []
+        self.components = list(components)
 
     def __repr__(self) -> str:
         return "Bf3File({0.comments!r}, {0.components!r})".format(self)
@@ -422,7 +421,7 @@ class Bf3File:
     def from_binary(
         cls,
         raw_rdr: BytesReader,
-        comments: dict | None = None,
+        comments: Optional[dict] = None,
         check_cmac: bool = True,
         session_key: bytes = DEFAULT_SESSION_KEY,
     ) -> "Bf3File":
@@ -737,7 +736,7 @@ class Bf3File:
             raise KeyError("Bf3 Package does not contain configuration")
 
     def set_config(
-        self, config: dict, additional_tvl_blocks: list[bytes] | None = None
+        self, config: dict, additional_tvl_blocks: Iterable[bytes] = ()
     ) -> None:
         try:
             del self.components[self._get_config_ndx()]
@@ -747,7 +746,7 @@ class Bf3File:
         tlvcfg_list = conf_dict_to_tlv(config)
 
         if additional_tvl_blocks:
-            tlvcfg_list += additional_tvl_blocks
+            tlvcfg_list += list(additional_tvl_blocks)
 
         tlvcfg_blob = (
             b"".join(

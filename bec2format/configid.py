@@ -1,5 +1,5 @@
 import re
-from typing import Any
+from typing import Any, Dict, Optional, Tuple
 
 from .error import (
     ConfigIdFormatError,
@@ -7,7 +7,7 @@ from .error import (
     MissingProjectSettingsNameError,
 )
 
-ConfDict = dict[tuple[int, int | None], bytes]
+ConfDict = Dict[Tuple[int, Optional[int]], bytes]
 
 
 UNKNOWN = 9999
@@ -16,11 +16,11 @@ UNKNOWN = 9999
 class ConfigId:
     def __init__(
         self,
-        customer: int | None,
-        project: int | None,
-        device: int | None,
-        version: int | None,
-        name: str | None,
+        customer: Optional[int],
+        project: Optional[int],
+        device: Optional[int],
+        version: Optional[int],
+        name: Optional[str],
     ):
         self.customer = customer if customer != UNKNOWN else None
         self.project = project if project != UNKNOWN else None
@@ -29,9 +29,7 @@ class ConfigId:
         self.name = name
 
     @classmethod
-    def create_from_prj_settings(
-        cls, config: dict[tuple[int, int], bytes]
-    ) -> "ConfigId":
+    def create_from_prj_settings(cls, config: ConfDict) -> "ConfigId":
         try:
             version = int.from_bytes(config[0x620, 0x07], byteorder="big")
         except KeyError:
@@ -120,7 +118,7 @@ class ConfigId:
             return "{0.name} (version {0.version:02})".format(self)
 
     @property
-    def cfgid_str(self) -> str | None:
+    def cfgid_str(self) -> Optional[str]:
         if self.is_baltech_naming_scheme:
             project_id = UNKNOWN if self.project is None else self.project
             if self.is_device_settings:
