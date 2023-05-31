@@ -1,3 +1,9 @@
+import sys
+
+if sys.implementation.name == "micropython":
+    import bec2format.micropython_compatibility_quirks
+
+
 from .bec2file import (
     CONFIG_SECURITY_CODE_SIZE,
     Bec2File,
