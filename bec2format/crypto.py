@@ -27,8 +27,7 @@ class PublicEccKey:
     @classmethod
     def create_from_raw_fmt(cls, raw_fmt: bytes):
         der_header = bytes.fromhex(
-            "30 59 30 13 06 07 2A 86 48 CE 3D 02 01 06 08 2A 86 48 CE 3D 03 01 "
-            "07 03 42 00 04"
+            "3059301306072A8648CE3D020106082A8648CE3D03010703420004"
         )
         return cls.create_from_der_fmt(der_header + raw_fmt)
 
