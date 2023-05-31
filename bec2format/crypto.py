@@ -1,31 +1,26 @@
-from abc import ABC, abstractmethod
 from typing import Optional, Type
 
 
-class AES128(ABC):
+class AES128:
     BLOCK_SIZE = 16
     KEY_SIZE = 16
 
-    @abstractmethod
     def __init__(self, key: bytes, iv: Optional[bytes] = None) -> None:
-        ...
+        self._key = key
+        self._iv = iv
 
-    @abstractmethod
     def encrypt(self, data: bytes) -> bytes:
-        ...
+        raise NotImplementedError()
 
-    @abstractmethod
     def decrypt(self, data: bytes) -> bytes:
-        ...
+        raise NotImplementedError()
 
-    @abstractmethod
     def mac(self, data: bytes) -> bytes:
-        ...
+        raise NotImplementedError()
 
 
 class PublicEccKey:
     @classmethod
-    @abstractmethod
     def create_from_der_fmt(cls, der_fmt: bytes) -> "PublicEccKey":
         raise NotImplementedError()
 
@@ -37,9 +32,8 @@ class PublicEccKey:
         )
         return cls.create_from_der_fmt(der_header + raw_fmt)
 
-    @abstractmethod
     def to_der_fmt(self) -> bytes:
-        ...
+        raise NotImplementedError()
 
     def to_raw_bin_fmt(self) -> bytes:
         der_header_len = 27
@@ -49,23 +43,19 @@ class PublicEccKey:
 
 class PrivateEccKey:
     @classmethod
-    @abstractmethod
     def create_from_der_fmt(cls, private_key_der_fmt: bytes) -> "PrivateEccKey":
         raise NotImplementedError()
 
     @classmethod
-    @abstractmethod
     def generate(cls) -> "PrivateEccKey":
         raise NotImplementedError()
 
     @property
-    @abstractmethod
     def public_key(self) -> PublicEccKey:
-        ...
+        raise NotImplementedError()
 
-    @abstractmethod
     def compute_dh_secret(self, public_key: PublicEccKey) -> bytes:
-        ...
+        raise NotImplementedError()
 
 
 def random_bytes(num_bytes: int) -> bytes:

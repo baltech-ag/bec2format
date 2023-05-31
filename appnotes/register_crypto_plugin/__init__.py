@@ -16,11 +16,6 @@ from .pyaes import aes, blockfeeder
 
 @register_AES128
 class AES128Proxy(AES128Base):
-    def __init__(self, key: bytes, iv: Optional[bytes] = None) -> None:
-        super().__init__(key, iv)
-        self._key = key
-        self._iv = iv
-
     def encrypt(self, data: bytes) -> bytes:
         mode = aes.AESModeOfOperationCBC(self._key, self._iv)
         encryptor = blockfeeder.Encrypter(mode, padding="none")
