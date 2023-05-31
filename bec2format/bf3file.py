@@ -211,7 +211,7 @@ def pfid2_filter_to_str(pfid2filter: bytes) -> str:
     group_strs = []
     hwcid_strs = []
     for pos in range(2, len(pfid2filter), 2):
-        filter_entry = int.from_bytes(pfid2filter[pos : pos + 2], byteorder="big")
+        filter_entry = int.from_bytes(pfid2filter[pos : pos + 2], "big")
         hwcid = filter_entry & 0x3FFF
         hwcid_str = REV_HWCID_MAP.get(hwcid, "0x{:04X}".format(hwcid))
         if filter_entry & 0x4000:
@@ -298,28 +298,26 @@ class Bf3File:
             raw_data = comp.get_raw_data(session_key)
             payload_cmac = cmac(raw_data, session_key)
             dir_entry = bytes()
-            dir_entry += next_blob_adr.to_bytes(4, byteorder="big")
-            dir_entry += len(raw_data).to_bytes(4, byteorder="big")
-            dir_entry += comp.actual_len.to_bytes(4, byteorder="big")
+            dir_entry += next_blob_adr.to_bytes(4, "big")
+            dir_entry += len(raw_data).to_bytes(4, "big")
+            dir_entry += comp.actual_len.to_bytes(4, "big")
             dir_entry += payload_cmac
             sorted_tags = list(comp.description.items())
             if not isinstance(comp.description, dict):
                 sorted_tags.sort()
             tlv_entries = bytes()
             for tag_id, tag_value in sorted_tags:
-                tlv_entries += tag_id.to_bytes(1, byteorder="big")
-                tlv_entries += len(tag_value).to_bytes(1, byteorder="big")
+                tlv_entries += tag_id.to_bytes(1, "big")
+                tlv_entries += len(tag_value).to_bytes(1, "big")
                 tlv_entries += tag_value
-            dir_entry += len(tlv_entries).to_bytes(1, byteorder="big")
+            dir_entry += len(tlv_entries).to_bytes(1, "big")
             dir_entry += tlv_entries
             next_blob_adr += len(raw_data)
-            iv = (1 + comp_ndx).to_bytes(CMAC_SIZE, byteorder="big")
+            iv = (1 + comp_ndx).to_bytes(CMAC_SIZE, "big")
             dir_entry += cmac(dir_entry, session_key, iv)
-            directory += len(dir_entry).to_bytes(1, byteorder="big") + dir_entry
-        directory += 0x00.to_bytes(
-            1, byteorder="big"
-        )  # sentinel which marks end of directory
-        return len(directory).to_bytes(4, byteorder="big") + directory
+            directory += len(dir_entry).to_bytes(1, "big") + dir_entry
+        directory += (0).to_bytes(1, "big")  # sentinel which marks end of directory
+        return len(directory).to_bytes(4, "big") + directory
 
     def to_binary(
         self, offset: int = 0, session_key: bytes = DEFAULT_SESSION_KEY
@@ -385,7 +383,7 @@ class Bf3File:
                     "than TotalLen DirectoryEntry"
                 )
             payload_cmac = dir_entry_rdr.read(CMAC_SIZE)
-            iv = dir_entry_ndx.to_bytes(CMAC_SIZE, byteorder="big")
+            iv = dir_entry_ndx.to_bytes(CMAC_SIZE, "big")
             description = {}
             description_len = dir_entry_rdr.read_int(1)
             description_rdr = BytesReader(
@@ -525,15 +523,13 @@ class Bf3File:
             del bf2_instrs["REBOOT"]
         if "CRC" in bf2_instrs:
             crcval = bf2_instrs.pop("CRC")
-            bf3desc[BF3TAG.CRC] = int(crcval[2:], 16).to_bytes(4, byteorder="big")
+            bf3desc[BF3TAG.CRC] = int(crcval[2:], 16).to_bytes(4, "big")
         if "SELECT" in bf2_instrs:
             bf3desc[BF3TAG.PFID2] = hex2bin(bf2_instrs["SELECT"]["FILTER"])
-            if bf3desc[BF3TAG.TYPE] == BF3TYPE.PERIPHERAL.to_bytes(1, byteorder="big"):
+            if bf3desc[BF3TAG.TYPE] == BF3TYPE.PERIPHERAL.to_bytes(1, "big"):
                 pfid2 = bf3desc[BF3TAG.PFID2].hex(" ").upper()
                 if pfid2 in PFID2FILTER_TO_HWCID_SPECIAL_CASES:
-                    hwcid = PFID2FILTER_TO_HWCID_SPECIAL_CASES[pfid2].to_bytes(
-                        2, byteorder="big"
-                    )
+                    hwcid = PFID2FILTER_TO_HWCID_SPECIAL_CASES[pfid2].to_bytes(2, "big")
                 elif pfid2.startswith("01 01"):
                     hwcid = bf3desc[BF3TAG.PFID2][-2:]
                 else:
@@ -549,9 +545,9 @@ class Bf3File:
             bf3comments["FirmwareVersion"] = bf2_instrs["Firmware"][15:22]
             debug_fw = bf3comments["FirmwareVersion"].startswith("D-")
             if not debug_fw:
-                fwid_buf = int(bf3comments["FirmwareId"]).to_bytes(
-                    2, byteorder="big"
-                ) + bytes(list(map(int, bf3comments["FirmwareVersion"].split("."))))
+                fwid_buf = int(bf3comments["FirmwareId"]).to_bytes(2, "big") + bytes(
+                    list(map(int, bf3comments["FirmwareVersion"].split(".")))
+                )
                 if bf3desc[BF3TAG.TYPE] in (
                     bytes([BF3TYPE.LOADER]),
                     bytes([BF3TYPE.MAIN]),
@@ -566,22 +562,20 @@ class Bf3File:
             if protocol != "*":
                 if protocol not in BF2_INTERFACES:
                     raise UnsupportedBf2InstrError()
-                bf3desc[BF3TAG.INTF] = BF2_INTERFACES[protocol].to_bytes(
-                    1, byteorder="big"
-                )
+                bf3desc[BF3TAG.INTF] = BF2_INTERFACES[protocol].to_bytes(1, "big")
 
     @classmethod
     def annotations(cls, comps: list[Bf3Component]) -> Iterator[tuple[str, str]]:
         for ndx, comp in enumerate(comps):
-            comptype = int.from_bytes(comp.description[BF3TAG.TYPE], byteorder="big")
+            comptype = int.from_bytes(comp.description[BF3TAG.TYPE], "big")
             if comptype == BF3TYPE.MAIN:
                 comp_comment = "Main Firmware"
             elif comptype == BF3TYPE.LOADER:
                 rev_intf_map = {v: k for k, v in BF3INTF.__dict__.items()}
-                intf = int.from_bytes(comp.description[BF3TAG.INTF], byteorder="big")
+                intf = int.from_bytes(comp.description[BF3TAG.INTF], "big")
                 comp_comment = rev_intf_map[intf] + " Loader Firmware"
             elif comptype == BF3TYPE.PERIPHERAL:
-                hwcid = int.from_bytes(comp.description[BF3TAG.HWCID], byteorder="big")
+                hwcid = int.from_bytes(comp.description[BF3TAG.HWCID], "big")
                 hwcname = REV_HWCID_MAP.get(hwcid, "HWC 0x{:X}".format(hwcid))
                 hwcversion = comp.description.get(BF3TAG.FWVER)
                 if not hwcversion:
@@ -643,8 +637,8 @@ class Bf3File:
             content = b""
             blocks = Bf3File.bf2_unpack_payload(bf2lines)
             for adr, data in sorted(blocks.items()):
-                content += adr.to_bytes(4, byteorder="big")
-                content += len(data).to_bytes(4, byteorder="big")
+                content += adr.to_bytes(4, "big")
+                content += len(data).to_bytes(4, "big")
                 content += data
             return content
         else:
@@ -673,13 +667,13 @@ class Bf3File:
             if bf3tag_type is None:
                 return
             desc = {
-                BF3TAG.FMT: bf3tag_fmt.to_bytes(1, byteorder="big"),
-                BF3TAG.TYPE: bf3tag_type.to_bytes(1, byteorder="big"),
+                BF3TAG.FMT: bf3tag_fmt.to_bytes(1, "big"),
+                BF3TAG.TYPE: bf3tag_type.to_bytes(1, "big"),
             }
             if hwcid is not None:
-                desc[BF3TAG.HWCID] = hwcid.to_bytes(2, byteorder="big")
+                desc[BF3TAG.HWCID] = hwcid.to_bytes(2, "big")
             if interface is not None:
-                desc[BF3TAG.INTF] = interface.to_bytes(1, byteorder="big")
+                desc[BF3TAG.INTF] = interface.to_bytes(1, "big")
             try:
                 cls.exec_bf2instrs(bf2_instrs, desc, comments)
             except UnsupportedBf2InstrError:
@@ -751,7 +745,7 @@ class Bf3File:
         tlvcfg_blob = (
             b"".join(
                 [
-                    len(tlv_block).to_bytes(1, byteorder="big") + tlv_block
+                    len(tlv_block).to_bytes(1, "big") + tlv_block
                     for tlv_block in tlvcfg_list
                 ]
             )
@@ -760,10 +754,10 @@ class Bf3File:
 
         bf3_comp = Bf3Component(
             {
-                BF3TAG.TYPE: BF3TYPE.CONFIGURATION.to_bytes(1, byteorder="big"),
-                BF3TAG.ENC: BF3ENC.SESSIONKEY.to_bytes(1, byteorder="big"),
-                BF3TAG.FMT: BF3FMT.TLVCFG.to_bytes(1, byteorder="big"),
-                BF3TAG.REBOOT: True.to_bytes(1, byteorder="big"),
+                BF3TAG.TYPE: BF3TYPE.CONFIGURATION.to_bytes(1, "big"),
+                BF3TAG.ENC: BF3ENC.SESSIONKEY.to_bytes(1, "big"),
+                BF3TAG.FMT: BF3FMT.TLVCFG.to_bytes(1, "big"),
+                BF3TAG.REBOOT: (1).to_bytes(1, "big"),
             },
             tlvcfg_blob,
             len(tlvcfg_blob),
