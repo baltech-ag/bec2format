@@ -88,14 +88,14 @@ class AesEncryptorMixin(Encryptor):
         self.cipher.iv = bytes([0x00] * AES128.BLOCK_SIZE)
         header_len = 2  # header = 'B' + lenbyte
         min_padding_len = 1  # enforce minimal number of padding bytes
-        crc = crc8404B(plaintext).to_bytes(2, byteorder="big")
+        crc = crc8404B(plaintext).to_bytes(2, "big")
         padding_len = (
             -(header_len + min_padding_len + len(plaintext) + len(crc))
             % AES128.BLOCK_SIZE
         ) + min_padding_len
         plaintext = (
             b"B"
-            + (len(plaintext) + len(crc)).to_bytes(1, byteorder="big")  # header
+            + (len(plaintext) + len(crc)).to_bytes(1, "big")  # header
             + bytes([0x00] * padding_len)  # header
             + plaintext
             + crc
@@ -107,10 +107,10 @@ class AesEncryptorMixin(Encryptor):
         frame_rdr = BytesReader(self.cipher.decrypt(ciphertext), "Decrypted Frame")
         if frame_rdr.read(1) != b"B":
             raise Bec2FileFormatError('Authblock has to start with "B"')
-        payload_plus_crc_len = int.from_bytes(frame_rdr.read(1), byteorder="big")
+        payload_plus_crc_len = int.from_bytes(frame_rdr.read(1), "big")
         frame_rdr.seek(len(ciphertext) - payload_plus_crc_len)  # skip padding
         payload = frame_rdr.read(payload_plus_crc_len - 2)
-        crc = int.from_bytes(frame_rdr.read(2), byteorder="big")
+        crc = int.from_bytes(frame_rdr.read(2), "big")
         if crc8404B(payload) != crc:
             raise Bec2FileFormatError("Invalid CRC")
         return payload
@@ -353,9 +353,7 @@ class InitEccAuthBlock(AuthBlock):
             fallback_encryptor=EccEncryptor(),
             encryptor_filter=lambda e: e.key_selector == self.key_selector,
         )
-        return self.key_selector.to_bytes(1, byteorder="big") + encryptor.encrypt(
-            session_key
-        )
+        return self.key_selector.to_bytes(1, "big") + encryptor.encrypt(session_key)
 
     @classmethod
     def unpack(
@@ -386,7 +384,7 @@ class UpdateAuthBlock(AuthBlock):
     ) -> bytes:
         default_encryptor = ConfigSecurityCodeEncryptor(self.config_security_code)
         encryptor = self.select_encryptor(ext_encryptors, default_encryptor)
-        auth_block = session_key + self.version.to_bytes(1, byteorder="big")
+        auth_block = session_key + self.version.to_bytes(1, "big")
         return encryptor.encrypt(auth_block)
 
     @classmethod
@@ -396,7 +394,7 @@ class UpdateAuthBlock(AuthBlock):
         encryptor: ConfigSecurityCodeEncryptor = cls.select_encryptor(ext_encryptors)  # type: ignore
         auth_block = BytesReader(encryptor.decrypt(raw), cls.__name__)
         session_key = auth_block.read(AES128.BLOCK_SIZE)
-        version = int.from_bytes(auth_block.read(1), byteorder="big")
+        version = int.from_bytes(auth_block.read(1), "big")
         return (UpdateAuthBlock(encryptor.config_security_code, version), session_key)
 
     def __repr__(self) -> str:
@@ -456,8 +454,8 @@ class Bec2File:
         packed_auth_blocks = bytes()
         for auth_block in self.auth_blocks.values():
             auth_block_raw = auth_block.pack(self.session_key, ext_encryptors)
-            packed_auth_blocks += auth_block.tag.to_bytes(1, byteorder="big")
-            packed_auth_blocks += len(auth_block_raw).to_bytes(1, byteorder="big")
+            packed_auth_blocks += auth_block.tag.to_bytes(1, "big")
+            packed_auth_blocks += len(auth_block_raw).to_bytes(1, "big")
             packed_auth_blocks += auth_block_raw
         # TLV end block
         packed_auth_blocks += bytes([0x00, 0x00])
@@ -492,8 +490,8 @@ class Bec2File:
         common_session_key = None
         auth_blocks = []
         while True:
-            tlv_tag = int.from_bytes(raw_rdr.read(1), byteorder="big")
-            tlv_len = int.from_bytes(raw_rdr.read(1), byteorder="big")
+            tlv_tag = int.from_bytes(raw_rdr.read(1), "big")
+            tlv_len = int.from_bytes(raw_rdr.read(1), "big")
             tlv_value = raw_rdr.read(tlv_len)
             if tlv_tag == 0 and tlv_len == 0:
                 break

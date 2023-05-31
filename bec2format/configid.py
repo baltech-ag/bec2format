@@ -31,17 +31,17 @@ class ConfigId:
     @classmethod
     def create_from_prj_settings(cls, config: ConfDict) -> "ConfigId":
         try:
-            version = int.from_bytes(config[0x620, 0x07], byteorder="big")
+            version = int.from_bytes(config[0x620, 0x07], "big")
         except KeyError:
             raise MissingProjectSettingsNameError(
                 "This config does not contain its project settings version"
             )
         name = config[(0x620, 0x06)].decode() if (0x620, 0x06) in config else None
         try:
-            customer = int.from_bytes(config[0x620, 0x01], byteorder="big")
-            project = int.from_bytes(config[0x620, 0x05], byteorder="big")
+            customer = int.from_bytes(config[0x620, 0x01], "big")
+            project = int.from_bytes(config[0x620, 0x05], "big")
             device = int.from_bytes(
-                config.get((0x620, 0x02), bytes([0x00, 0x00])), byteorder="big"
+                config.get((0x620, 0x02), bytes([0x00, 0x00])), "big"
             )
         except KeyError:
             # Does not correspond to Baltech Naming Scheme
@@ -56,16 +56,16 @@ class ConfigId:
     @classmethod
     def create_from_dev_settings(cls, config: ConfDict) -> "ConfigId":
         try:
-            version = int.from_bytes(config[0x620, 0x04], byteorder="big")
+            version = int.from_bytes(config[0x620, 0x04], "big")
         except KeyError:
             raise MissingDeviceSettingsNameError(
                 "This config does not contain its device settings name"
             )
         name = config[(0x620, 0x03)].decode() if (0x620, 0x03) in config else None
         try:
-            customer = int.from_bytes(config[0x620, 0x01], byteorder="big")
+            customer = int.from_bytes(config[0x620, 0x01], "big")
             device = int.from_bytes(
-                config.get((0x620, 0x02), bytes([0x00, 0x00])), byteorder="big"
+                config.get((0x620, 0x02), bytes([0x00, 0x00])), "big"
             )
         except KeyError:
             # Does not correspond to Baltech Naming Scheme

@@ -10,10 +10,10 @@ config = {
     (0x1111, 0x22): bytes([0x33, 0x33, 0x33]),
     (0x1111, 0x77): bytes([0x55, 0x66, 0x77, 0x88]),
     (0x0202, 0x82): config_security_code,
-    (0x0620, 0x01): (10234).to_bytes(4, byteorder="big"),
-    (0x0620, 0x05): (5678).to_bytes(2, byteorder="big"),
-    (0x0620, 0x02): (6789).to_bytes(2, byteorder="big"),
-    (0x0620, 0x07): (9).to_bytes(1, byteorder="big"),
+    (0x0620, 0x01): (10234).to_bytes(4, "big"),
+    (0x0620, 0x05): (5678).to_bytes(2, "big"),
+    (0x0620, 0x02): (6789).to_bytes(2, "big"),
+    (0x0620, 0x07): (9).to_bytes(1, "big"),
     (0x0620, 0x06): b"Testname",
 }
 

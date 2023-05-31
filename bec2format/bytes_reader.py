@@ -15,7 +15,7 @@ class BytesReader(BytesIO):
         self.exception = exception
 
     def read_int(self, num_bytes: int) -> int:
-        return int.from_bytes(self.read(num_bytes), byteorder="big")
+        return int.from_bytes(self.read(num_bytes), "big")
 
     def write(self, *args, **kwargs):
         raise self.exception("BytesReader() instance is not writable")
