@@ -2,14 +2,14 @@ from hashlib import sha256
 from io import BytesIO
 from typing import Callable, Iterable, Optional, TextIO, Type
 
-from bec2format.bf3file import Bf3File
-from bec2format.bytes_reader import BytesReader
-from bec2format.configid import (
+from .bf3file import Bf3File
+from .bytes_reader import BytesReader
+from .configid import (
     ConfigId,
     MissingDeviceSettingsNameError,
     MissingProjectSettingsNameError,
 )
-from bec2format.crypto import (
+from .crypto import (
     AES128,
     PrivateEccKey,
     PublicEccKey,
@@ -19,7 +19,7 @@ from bec2format.crypto import (
     generate_private_ecc_key,
     random_bytes,
 )
-from bec2format.error import Bec2FileFormatError
+from .error import Bec2FileFormatError
 
 CONFIG_SECURITY_CODE_SIZE = 8
 CUSTOMER_KEY_SIZE = 10

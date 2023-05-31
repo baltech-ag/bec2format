@@ -3,10 +3,10 @@ from collections import namedtuple
 from re import sub
 from typing import Any, Iterable, Iterator, Optional, TextIO
 
-from bec2format.bytes_reader import BytesReader
-from bec2format.configid import ConfDict, ConfigId
-from bec2format.crypto import create_AES128, pad
-from bec2format.error import (
+from .bytes_reader import BytesReader
+from .configid import ConfDict, ConfigId
+from .crypto import create_AES128, pad
+from .error import (
     Bf3FileFormatError,
     MissingDeviceSettingsNameError,
     MissingProjectSettingsNameError,
@@ -14,7 +14,7 @@ from bec2format.error import (
     UnsupportedLegacyFirmwareError,
     UnsupportedTagTypeError,
 )
-from bec2format.hwcids import HWCID_MAP, REV_HWCID_MAP
+from .hwcids import HWCID_MAP, REV_HWCID_MAP
 
 _space_chars = " \t\r\n,-/:"
 _hex2bin_translate_table = str.maketrans(_space_chars, " " * len(_space_chars))
