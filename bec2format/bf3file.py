@@ -16,13 +16,9 @@ from .error import (
 )
 from .hwcids import HWCID_MAP, REV_HWCID_MAP
 
-_space_chars = " \t\r\n,-/:"
-_hex2bin_translate_table = str.maketrans(_space_chars, " " * len(_space_chars))
-
 
 def hex2bin(hex_value: str) -> bytes:
-    clean_hex_str = hex_value.translate(_hex2bin_translate_table)
-    clean_hex_str = sub(r"\s", r"", clean_hex_str)
+    clean_hex_str = sub(r"[\s,-/:]", r"", hex_value)
     if len(clean_hex_str) % 2 == 1:
         clean_hex_str = clean_hex_str[:-1] + "0" + clean_hex_str[-1]
     return unhexlify(clean_hex_str)
