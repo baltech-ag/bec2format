@@ -4,8 +4,18 @@ import binascii
 import base64
 import warnings
 from itertools import chain
-from six import int2byte, b, text_type
 from ._compat import str_idx_as_int
+
+
+text_type = str
+
+
+def b(s: str) -> bytes:
+    return s.encode("latin-1")
+
+
+def int2byte(i: int) -> bytes:
+    return i.to_bytes(1, "big")
 
 
 class UnexpectedDER(Exception):

@@ -5,7 +5,6 @@ Primary classes for performing signing and verification operations.
 import binascii
 from hashlib import sha1
 import os
-from six import PY2, b
 from . import ecdsa, eddsa
 from . import der
 from . import rfc6979
@@ -24,6 +23,13 @@ from .util import (
 from ._compat import normalise_bytes
 from .errors import MalformedPointError
 from .ellipticcurve import PointJacobi, CurveEdTw
+
+
+PY2 = False
+
+
+def b(s: str) -> bytes:
+    return s.encode("latin-1")
 
 
 __all__ = [

@@ -4,7 +4,9 @@ Common functions for providing cross-python version compatibility.
 import sys
 import re
 import binascii
-from six import integer_types
+
+
+integer_types = (int,)
 
 
 def str_idx_as_int(string, index):
@@ -103,7 +105,7 @@ else:
             """Cast the input into array of bytes."""
             if not buffer_object:
                 return b""
-            return memoryview(buffer_object).cast("B")
+            return bytes(buffer_object)
 
     else:
 
@@ -112,14 +114,15 @@ else:
 
         def normalise_bytes(buffer_object):
             """Cast the input into array of bytes."""
-            return memoryview(buffer_object).cast("B")
+            return bytes(buffer_object)
 
     def compat26_str(val):
         return val
 
     def remove_whitespace(text):
         """Removes all whitespace from passed in string"""
-        return re.sub(r"\s+", "", text, flags=re.UNICODE)
+        re_flag_UNICODE = 32
+        return re.sub(r"\s+", "", text, re_flag_UNICODE)
 
     def a2b_hex(val):
         try:
@@ -135,7 +138,9 @@ else:
 
     def bit_length(val):
         """Return number of bits necessary to represent an integer."""
-        return val.bit_length()
+        if val == 0:
+            return 0
+        return len(bin(val)) - 2
 
     def int_to_bytes(val, length=None, byteorder="big"):
         """Convert integer to bytes."""
@@ -144,7 +149,7 @@ else:
         # for gmpy we need to convert back to native int
         if type(val) != int:
             val = int(val)
-        return bytearray(val.to_bytes(length=length, byteorder=byteorder))
+        return bytearray(val.to_bytes(length, byteorder))
 
 
 def byte_length(val):
