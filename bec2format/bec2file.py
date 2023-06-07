@@ -65,7 +65,7 @@ class Encryptor:
         raise NotImplementedError()
 
     def __repr__(self) -> str:
-        return "{0.__class__.__name__}(...)".format(self)
+        return "{class_name}(...)".format(class_name=self.__class__.__name__)
 
 
 class KeySelectorEncryptor(Encryptor):
@@ -359,7 +359,9 @@ class InitEccAuthBlock(AuthBlock):
         return InitEccAuthBlock(key_selector), session_key
 
     def __repr__(self) -> str:
-        return "InitEccAuthBlock({0.key_selector!r})".format(self)
+        return "InitEccAuthBlock({key_selector!r})".format(
+            key_selector=self.key_selector
+        )
 
 
 class UpdateAuthBlock(AuthBlock):
@@ -390,7 +392,9 @@ class UpdateAuthBlock(AuthBlock):
         return (UpdateAuthBlock(encryptor.config_security_code, version), session_key)
 
     def __repr__(self) -> str:
-        return "UpdateAuthBlock({0.config_security_code!r}, {0.version!r})".format(self)
+        return "UpdateAuthBlock({config_security_code!r}, {version!r})".format(
+            config_security_code=self.config_security_code, version=self.version
+        )
 
 
 class UnknownAuthBlock(AuthBlock):
@@ -410,7 +414,9 @@ class UnknownAuthBlock(AuthBlock):
         raise Bec2FileFormatError("Cannot unpack unknown auth block")
 
     def __repr__(self) -> str:
-        return "UnknownAuthBlock({0.tag}, {0.binary_value!r})".format(self)
+        return "UnknownAuthBlock({tag}, {binary_value!r})".format(
+            tag=self.tag, binary_value=self.binary_value
+        )
 
 
 class Bec2File:
@@ -508,9 +514,10 @@ class Bec2File:
         return auth_blocks, common_session_key
 
     def __repr__(self) -> str:
-        return (
-            "Bec2File({0.bf3file!r}, {0.auth_blocks!r}, "
-            "{0.session_key!r})".format(self)
+        return "Bec2File({bf3file!r}, {auth_blocks!r}, " "{session_key!r})".format(
+            bf3file=self.bf3file,
+            auth_blocks=self.auth_blocks,
+            session_key=self.session_key,
         )
 
     def derive_auth_blocks_from_config(

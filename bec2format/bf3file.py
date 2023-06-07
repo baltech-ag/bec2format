@@ -284,7 +284,9 @@ class Bf3File:
         self.components = list(components)
 
     def __repr__(self) -> str:
-        return "Bf3File({0.comments!r}, {0.components!r})".format(self)
+        return "Bf3File({comments!r}, {components!r})".format(
+            comments=self.comments, components=self.components
+        )
 
     def dir_to_binary(
         self, next_blob_adr: int = 0, session_key: bytes = DEFAULT_SESSION_KEY
@@ -334,7 +336,7 @@ class Bf3File:
             sorted_comments = comments.items()
             if not isinstance(comments, dict):
                 sorted_comments.sort()
-            lines = map("{0[0]}: {0[1]}\n".format, sorted_comments)
+            lines = map(lambda tup: "{}: {}\n".format(*tup), sorted_comments)
             bf3fileobj.write("".join(lines))
             bf3fileobj.write("\n")
             for pos in range(0, len(rawdata) + END_OF_LINE // 2 - 1, END_OF_LINE // 2):
