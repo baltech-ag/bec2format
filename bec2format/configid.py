@@ -115,17 +115,24 @@ class ConfigId:
         if self.is_baltech_naming_scheme:
             return self.cfgid_str + (" " + self.name if self.name else "")
         else:
-            return "{0.name} (version {0.version:02})".format(self)
+            return "{name} (version {version:02})".format(
+                name=self.name, version=self.version
+            )
 
     @property
     def cfgid_str(self) -> Optional[str]:
         if self.is_baltech_naming_scheme:
             project_id = UNKNOWN if self.project is None else self.project
             if self.is_device_settings:
-                fmtstr = "{0.customer:05}-{projectId:04}-0000-{0.version:02}"
+                fmtstr = "{customer:05}-{projectId:04}-0000-{version:02}"
             else:
-                fmtstr = "{0.customer:05}-{projectId:04}-{0.device:04}-{0.version:02}"
-            return fmtstr.format(self, projectId=project_id)
+                fmtstr = "{customer:05}-{projectId:04}-{device:04}-{version:02}"
+            return fmtstr.format(
+                customer=self.customer,
+                version=self.version,
+                device=self.device,
+                projectId=project_id,
+            )
         else:
             return None
 
@@ -145,6 +152,10 @@ class ConfigId:
         return not self == other
 
     def __repr__(self) -> str:
-        return "ConfigId({0.customer}, {0.project}, {0.device}, {0.version}, {0.name!r})".format(
-            self
+        return "ConfigId({customer}, {project}, {device}, {version}, {name!r})".format(
+            customer=self.customer,
+            project=self.project,
+            device=self.device,
+            version=self.version,
+            name=self.name,
         )

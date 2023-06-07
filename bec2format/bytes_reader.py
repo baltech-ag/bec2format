@@ -26,4 +26,6 @@ class BytesReader(BytesIO):
     def ensure_eof(self) -> None:
         if not self.eof():
             source = "" if self.source is None else " of " + str(self.source)
-            raise self.exception(f"Unexpected data at end {source}")
+            raise self.exception(
+                "Unexpected data at end {source}".format(source=source)
+            )
