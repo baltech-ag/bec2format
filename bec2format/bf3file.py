@@ -452,11 +452,14 @@ class Bf3File:
     ) -> tuple[BytesReader, dict[str, str]]:
         is_file_path = isinstance(bf3file, str)
         bf3fileobj = open(bf3file, "r") if is_file_path else bf3file
-        bf3_line_iter = iter(bf3fileobj.readline, "\n")
         try:
             try:
-                key_val_list = (l.split(":", 1) for l in bf3_line_iter)
-                comments = {k: v.strip() for k, v in key_val_list}
+                comments = {}
+                line = bf3fileobj.readline()
+                while line != "\n":
+                    k, v = line.split(":", 1)
+                    comments[k] = v.strip()
+                    line = bf3fileobj.readline()
             except ValueError:
                 raise Bf3FileFormatError("Invalid Comment Field Format")
             try:
