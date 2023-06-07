@@ -1,9 +1,11 @@
 from __future__ import division
 
-from six import PY2
 from . import der, ecdsa, ellipticcurve, eddsa
 from .util import orderlen, number_to_string, string_to_number
 from ._compat import normalise_bytes, bit_length
+
+
+PY2 = False
 
 
 # orderlen was defined in this module previously, so keep it in __all__,

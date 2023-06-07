@@ -5,9 +5,21 @@ import math
 import binascii
 import sys
 from hashlib import sha256
-from six import PY2, int2byte, b, next
+from builtins import next
 from . import der
 from ._compat import normalise_bytes
+
+
+PY2 = False
+
+
+def b(s: str) -> bytes:
+    return s.encode("latin-1")
+
+
+def int2byte(i: int) -> bytes:
+    return i.to_bytes(1, "big")
+
 
 # RFC5480:
 #   The "unrestricted" algorithm identifier is:
@@ -35,9 +47,13 @@ oid_ecMQV = (1, 3, 132, 1, 13)
 
 if sys.version_info >= (3,):  # pragma: no branch
 
+    def zfill(value, width: int):
+        return "{:0>{width}}".format(value, width=width)
+
     def entropy_to_bits(ent_256):
         """Convert a bytestring to string of 0's and 1's"""
-        return bin(int.from_bytes(ent_256, "big"))[2:].zfill(len(ent_256) * 8)
+        bin_value = bin(int.from_bytes(ent_256, "big"))[2:]
+        return zfill(bin_value, len(ent_256) * 8)
 
 else:
 
@@ -54,7 +70,9 @@ if sys.version_info < (2, 7):  # pragma: no branch
 else:
 
     def bit_length(x):
-        return x.bit_length() or 1
+        if x == 0:
+            return 0
+        return len(bin(x)) - 2
 
 
 def orderlen(order):
@@ -80,7 +98,7 @@ def randrange(order, entropy=None):
     while True:  # I don't think this needs a counter with bit-wise randrange
         ent_256 = entropy(upper_256)
         ent_2 = entropy_to_bits(ent_256)
-        rand_num = int(ent_2[:upper_2], base=2) + 1
+        rand_num = int(ent_2[:upper_2], 2) + 1
         if 0 < rand_num < order:
             return rand_num
 

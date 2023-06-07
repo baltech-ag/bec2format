@@ -64,11 +64,18 @@ Originally written in 2005 by Peter Pearson and placed in the public domain,
 modified as part of the python-ecdsa package.
 """
 
-from six import int2byte, b
 from . import ellipticcurve
 from . import numbertheory
 from .util import bit_length
 from ._compat import remove_whitespace
+
+
+def b(s: str) -> bytes:
+    return s.encode("latin-1")
+
+
+def int2byte(i: int) -> bytes:
+    return i.to_bytes(1, "big")
 
 
 class RSZeroError(RuntimeError):

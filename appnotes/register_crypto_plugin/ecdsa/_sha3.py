@@ -10,7 +10,7 @@ try:
     def shake_256(msg, outlen):
         return hashlib.new("shake256", msg).digest(outlen)
 
-except (TypeError, ValueError):
+except (TypeError, ValueError, AttributeError):
 
     from ._compat import bytes_to_int, int_to_bytes
 

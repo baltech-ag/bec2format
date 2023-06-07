@@ -12,7 +12,10 @@
 import errno
 import os
 import re
-import subprocess
+try:
+    import subprocess
+except ImportError:
+    pass
 import sys
 
 

@@ -47,14 +47,12 @@ except ImportError:  # pragma: no branch
         GMPY = False
 
 
-from six import python_2_unicode_compatible
 from . import numbertheory
 from ._compat import normalise_bytes, int_to_bytes, bit_length, bytes_to_int
 from .errors import MalformedPointError
 from .util import orderlen, string_to_number, number_to_string
 
 
-@python_2_unicode_compatible
 class CurveFp(object):
     """
     :term:`Short Weierstrass Elliptic Curve <short Weierstrass curve>` over a
@@ -328,9 +326,8 @@ class AbstractPoint(object):
 
         return x, y
 
-    @classmethod
     def from_bytes(
-        cls, curve, data, validate_encoding=True, valid_encodings=None
+        self, curve, data, validate_encoding=True, valid_encodings=None
     ):
         """
         Initialise the object from byte encoding of a point.
@@ -377,23 +374,23 @@ class AbstractPoint(object):
         data = normalise_bytes(data)
 
         if isinstance(curve, CurveEdTw):
-            return cls._from_edwards(curve, data)
+            return self._from_edwards(curve, data)
 
         key_len = len(data)
         raw_encoding_length = 2 * orderlen(curve.p())
         if key_len == raw_encoding_length and "raw" in valid_encodings:
-            coord_x, coord_y = cls._from_raw_encoding(
+            coord_x, coord_y = self._from_raw_encoding(
                 data, raw_encoding_length
             )
         elif key_len == raw_encoding_length + 1 and (
             "hybrid" in valid_encodings or "uncompressed" in valid_encodings
         ):
             if data[:1] in (b"\x06", b"\x07") and "hybrid" in valid_encodings:
-                coord_x, coord_y = cls._from_hybrid(
+                coord_x, coord_y = self._from_hybrid(
                     data, raw_encoding_length, validate_encoding
                 )
             elif data[:1] == b"\x04" and "uncompressed" in valid_encodings:
-                coord_x, coord_y = cls._from_raw_encoding(
+                coord_x, coord_y = self._from_raw_encoding(
                     data[1:], raw_encoding_length
                 )
             else:
@@ -404,7 +401,7 @@ class AbstractPoint(object):
             key_len == raw_encoding_length // 2 + 1
             and "compressed" in valid_encodings
         ):
-            coord_x, coord_y = cls._from_compressed(data, curve)
+            coord_x, coord_y = self._from_compressed(data, curve)
         else:
             raise MalformedPointError(
                 "Length of string does not match lengths of "
@@ -572,7 +569,7 @@ class PointJacobi(AbstractPoint):
         :return: Point on curve
         :rtype: PointJacobi
         """
-        coord_x, coord_y = super(PointJacobi, cls).from_bytes(
+        coord_x, coord_y = AbstractPoint().from_bytes(
             curve, data, validate_encoding, valid_encodings
         )
         return PointJacobi(curve, coord_x, coord_y, 1, order, generator)

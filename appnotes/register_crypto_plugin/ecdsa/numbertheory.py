@@ -12,8 +12,14 @@
 from __future__ import division
 
 import sys
-from six import integer_types, PY2
-from six.moves import reduce
+from functools import reduce
+
+
+PY2 = False
+
+
+integer_types = (int,)
+
 
 try:
     xrange
