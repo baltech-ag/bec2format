@@ -1,6 +1,7 @@
 # [BALTECH AG](https://www.baltech.de/?lang=en) - BEC2 file format
 
 * Authors: Baltech AG <info@baltech.de>
+* License: [MIT](LICENSE.md)
 
 ## Add the dependency to your project
 
