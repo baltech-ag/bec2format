@@ -1,0 +1,61 @@
+name: Verify BEC2 format
+on:
+  push:
+jobs:
+  verify:
+    runs-on: ubuntu-20.04
+    env:
+      micropython_tag: 'v1.20.0'
+    strategy:
+      matrix:
+        interpreter:
+          - .tox/py310/bin/python
+          - micropython/ports/unix/build-standard/micropython
+        script:
+          - create_bec2file_with_cust_key.py
+          - create_bec2file_with_ec_key.py
+          - create_bf3file.py
+          - verify_dh_secret.py
+    steps:
+      - name: Setup Python
+        if: ${{ matrix.interpreter == '.tox/py310/bin/python' }}
+        uses: actions/setup-python@v4
+        id: setup-python
+        with:
+          python-version: '3.10'
+      - name: Tox Cache
+        if: ${{ matrix.interpreter == '.tox/py310/bin/python' }}
+        uses: actions/cache@v3
+        with:
+          path: ${{ github.workspace }}/.tox
+          key: ${{ runner.os }}-python-${{ steps.setup-python.outputs.python-version }}-tox-${{ hashFiles('tox.ini') }}-poetry-${{ hashFiles('poetry.lock') }}
+      - name: Tox Setup
+        if: ${{ matrix.interpreter == '.tox/py310/bin/python' }}
+        run:  pip install tox==4.6.0
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Prepare Python
+        if: ${{ matrix.interpreter == '.tox/py310/bin/python' }}
+        run: tox
+      - name: Install bec2format for Python
+        if: ${{ matrix.interpreter == '.tox/py310/bin/python' }}
+        run: pip install ${{ github.workspace }}
+      - name: Cache Micropython
+        id: cache-micropython
+        if: ${{ matrix.interpreter == 'micropython/ports/unix/build-standard/micropython' }}
+        uses: actions/cache@v3
+        with:
+          path: ${{ github.workspace }}/micropython
+          key: ${{ runner.os }}-micropython-${{ env.micropython_tag }}
+      - name: Build Micropython
+        if: ${{ matrix.interpreter == 'micropython/ports/unix/build-standard/micropython' && steps.cache-micropython.outputs.cache-hit != 'true' }}
+        run:  ${{ github.workspace }}/.github/workflows/build_micropython.sh ${{ github.workspace }} ${{ env.micropython_tag }}
+      - name: Install bec2format for Micropython and its dependencies
+        if: ${{ matrix.interpreter == 'micropython/ports/unix/build-standard/micropython' }}
+        run: |
+          rm --recursive --force $HOME/.micropython/lib/bec2format
+          mkdir --parents $HOME/.micropython/lib
+          cp --recursive ${{ github.workspace }}/bec2format $HOME/.micropython/lib/bec2format
+          ${{ github.workspace }}/micropython/ports/unix/build-standard/micropython ${{ github.workspace }}/appnotes/install_dependencies.py
+      - name: Verify BEC2 format
+        run: ${{ github.workspace }}/${{ matrix.interpreter }} ${{ github.workspace }}/appnotes/${{ matrix.script }}
