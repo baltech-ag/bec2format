@@ -7,7 +7,6 @@ from invoke import Context, task
 @task()
 def install(ctx: Context) -> None:
     """install project dependencies"""
-    ctx.run("poetry lock --no-update")
     ctx.run("poetry install")
 
 
