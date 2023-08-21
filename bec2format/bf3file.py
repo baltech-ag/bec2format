@@ -331,7 +331,7 @@ class Bf3File:
         bf3file: str | TextIO, comments: dict[str, str], rawdata: bytes
     ) -> None:
         is_file_path = isinstance(bf3file, str)
-        bf3fileobj = open(bf3file, "w") if is_file_path else bf3file
+        bf3fileobj = open(bf3file, "w", newline="\r\n") if is_file_path else bf3file
         try:
             sorted_comments = comments.items()
             if not isinstance(comments, dict):
