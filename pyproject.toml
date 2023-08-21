@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "bec2format"
-version = "1.00.00"
+version = "1.00.01"
 description = "BALTECH BEC2 file format"
 authors = ["Baltech AG <info@baltech.de>"]
 license = "MIT"
