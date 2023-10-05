@@ -1,0 +1,13 @@
+# Version: 2023-10-05
+# This is an organization workflow, it should not be edited!
+# The original source is in the baltech-ag/ci-scripts repository in the templates folder
+# https://baltech-wiki.atlassian.net/wiki/spaces/THIR/pages/257785857/GitHub#GitHub-Workflows-f%C3%BCr-Releasemanagement-einrichten
+name: Jira Push Integration
+on:
+  push:
+    branches:
+      - '**'
+jobs:
+  jira-integration-push:
+    uses: baltech-ag/ci-scripts/.github/workflows/jira-push.yml@master
+    secrets: inherit

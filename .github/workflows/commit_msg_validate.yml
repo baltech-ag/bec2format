@@ -1,8 +1,0 @@
-on:
-  push:
-    branches-ignore:
-      - 'dbg-**'
-      - 'rt-**'
-jobs:
-  commit-msg-validate:
-    uses: baltech-ag/ci-scripts/.github/workflows/commit_msg_validate.yml@master
