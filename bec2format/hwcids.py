@@ -92,6 +92,7 @@ HWCID_MAP = dict(
     SM4500=0xBD,
     BGM12X=0xBE,
     BGM220=0xBF,
+    SM6300=0xC0,
 )
 
 REV_HWCID_MAP = {v: k for k, v in HWCID_MAP.items()}
