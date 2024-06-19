@@ -154,6 +154,8 @@ BF2_TAGTYPE_MAP = {
     0x35: (BF3TYPE.PERIPHERAL, HWCID_MAP["SM4200"], BF3FMT.BLOB, BF3INTF.NFC),
     0x39: (BF3TYPE.PERIPHERAL, HWCID_MAP["BGM12X"], BF3FMT.BLOB, None),
     0x3D: (BF3TYPE.PERIPHERAL, HWCID_MAP["PN5180"], BF3FMT.BLOB, BF3INTF.NFC),
+    0x40: (BF3TYPE.PERIPHERAL, HWCID_MAP['SM6300'], BF3FMT.BLOB, BF3INTF.NFC),
+    0x48: (None, None, None, None),  # ignore SM6300 activate tag
     0x70: (BF3TYPE.LOADER, None, BF3FMT.BF2COMPATIBLE, None),
     0x83: (BF3TYPE.LOADER, None, BF3FMT.BF2COMPATIBLE, None),
     0x84: (BF3TYPE.MAIN, None, BF3FMT.BF2COMPATIBLE, None),
@@ -165,6 +167,7 @@ def is_known_tagtype(tagtype):
         (0x35, 0x38),  # SM4200
         (0x39, 0x3C),  # BLE
         (0x3D, 0x3E),  # PN5180
+        (0x40, 0x47),  # SM6300
         (0x70, 0x73),  # UC_LOADER_V3
         (0x83, 0x83),  # UC_LOADER_V3_SINGLEBANK
         (0x84, 0xA3),  # UC_V3
@@ -581,7 +584,7 @@ class Bf3File:
                 hwcversion = comp.description.get(BF3TAG.FWVER)
                 if not hwcversion:
                     hwcversionstr = ""
-                elif hwcname[:3] == "SM4" and len(hwcversion) >= 4:
+                elif hwcname[:2] == "SM" and len(hwcversion) >= 4:
                     hwcversionstr = " {}.{}.{}.{}".format(*hwcversion)
                 elif hwcname[:3] == "BGM" and len(hwcversion) >= 7:
                     hwcversionstr = " Version {}".format(hwcversion.decode())
