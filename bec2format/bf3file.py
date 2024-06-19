@@ -164,10 +164,12 @@ BF2_TAGTYPE_MAP = {
 
 def is_known_tagtype(tagtype):
     known_tagtypes = [
+        (0x34, 0x34),  # SM4200 delay
         (0x35, 0x38),  # SM4200
         (0x39, 0x3C),  # BLE
         (0x3D, 0x3E),  # PN5180
         (0x40, 0x47),  # SM6300
+        (0x48, 0x48),  # SM6300 delay
         (0x70, 0x73),  # UC_LOADER_V3
         (0x83, 0x83),  # UC_LOADER_V3_SINGLEBANK
         (0x84, 0xA3),  # UC_V3
@@ -698,17 +700,15 @@ class Bf3File:
                 bf2fileobj.close()
         for instr, params in bf2_objs:
             if instr == "load":
-                if bf2_fwdata:
-                    fwtagtype = params[0].fwtagtype
-                    if not is_known_tagtype(fwtagtype):
-                        raise Bf3FileFormatError(
-                            "TagType 0x{:02X} is not recognized by ConfigEditor".format(
-                                fwtagtype
-                            )
-                        )
-                    if fwtagtype in BF2_TAGTYPE_MAP:
-                        emit_bf3comp()
-                        bf2_fwdata = []
+                fwtagtype = params[0].fwtagtype
+                if not is_known_tagtype(fwtagtype):
+                    raise Bf3FileFormatError(
+                        "TagType 0x{:02X} is not recognized by ConfigEditor"
+                        .format(fwtagtype))
+                start_new_tag = fwtagtype in BF2_TAGTYPE_MAP and bf2_fwdata
+                if start_new_tag:
+                    emit_bf3comp()
+                    bf2_fwdata = []
                 bf2_fwdata = bf2_fwdata + params
             else:
                 if instr == "CHECK_FWVER" and "CHECK_FWVER" in bf2_instrs:
