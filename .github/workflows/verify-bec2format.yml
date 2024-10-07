@@ -3,9 +3,9 @@ on:
   push:
 jobs:
   verify:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     env:
-      micropython_tag: 'v1.20.0'
+      micropython_tag: 'v1.24.1'
     strategy:
       matrix:
         interpreter:
@@ -19,13 +19,13 @@ jobs:
     steps:
       - name: Setup Python
         if: ${{ matrix.interpreter == '.tox/py310/bin/python' }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         id: setup-python
         with:
           python-version: '3.10'
       - name: Tox Cache
         if: ${{ matrix.interpreter == '.tox/py310/bin/python' }}
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ github.workspace }}/.tox
           key: ${{ runner.os }}-python-${{ steps.setup-python.outputs.python-version }}-tox-${{ hashFiles('tox.ini') }}-poetry-${{ hashFiles('poetry.lock') }}
@@ -33,7 +33,7 @@ jobs:
         if: ${{ matrix.interpreter == '.tox/py310/bin/python' }}
         run:  pip install tox==4.6.0
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Prepare Python
         if: ${{ matrix.interpreter == '.tox/py310/bin/python' }}
         run: tox
@@ -43,7 +43,7 @@ jobs:
       - name: Cache Micropython
         id: cache-micropython
         if: ${{ matrix.interpreter == 'micropython/ports/unix/build-standard/micropython' }}
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ github.workspace }}/micropython
           key: ${{ runner.os }}-micropython-${{ env.micropython_tag }}
