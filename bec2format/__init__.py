@@ -36,3 +36,8 @@ from .error import (
     FormatError,
     UnsupportedLegacyFirmwareError,
 )
+
+try:
+    from .extras import aes
+except ImportError:
+    pass
