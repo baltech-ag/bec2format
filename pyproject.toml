@@ -6,7 +6,7 @@ authors = ["Baltech AG <info@baltech.de>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = ">=3.10,<3.11"
+python = ">=3.10"
 cryptography = { version = "*", optional = true }
 
 [tool.poetry.extras]
