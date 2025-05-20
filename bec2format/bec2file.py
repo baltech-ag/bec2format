@@ -1,6 +1,6 @@
 from hashlib import sha256
 from io import BytesIO
-from typing import Callable, Iterable, Optional, TextIO, Type
+from typing import Callable, ClassVar, Iterable, Optional, TextIO, Type, TypeVar
 
 from .bf3file import Bf3File
 from .bytes_reader import BytesReader
@@ -147,7 +147,7 @@ class SoftwareCustKeyEncryptor(AesEncryptorMixin, CustKeyEncryptor):
         self.customer_key_pos = customer_key_pos
 
     def encrypt(self, plaintext: bytes):
-        if self.customer_key:
+        if self.customer_key and self.customer_key_pos:
             plaintext = bytearray(plaintext)
             plaintext[
                 self.customer_key_pos : self.customer_key_pos + CUSTOMER_KEY_SIZE
@@ -156,7 +156,7 @@ class SoftwareCustKeyEncryptor(AesEncryptorMixin, CustKeyEncryptor):
 
     def decrypt(self, ciphertext):
         plaintext = super().decrypt(ciphertext)
-        if self.customer_key:
+        if self.customer_key and self.customer_key_pos:
             ck_pos = self.customer_key_pos
             if plaintext[ck_pos : ck_pos + CUSTOMER_KEY_SIZE] != self.customer_key:
                 raise Bec2FileFormatError("CustomerKey does not match")
@@ -420,7 +420,7 @@ class UnknownAuthBlock(AuthBlock):
 
 
 class Bec2File:
-    AUTH_BLOCK_CLS_MAP: dict[int, AuthBlock] = {
+    AUTH_BLOCK_CLS_MAP: dict[int, Type[AuthBlock]] = {
         c.TAG: c for c in [InitCustKeyAuthBlock, InitEccAuthBlock, UpdateAuthBlock]
     }
 
@@ -486,7 +486,7 @@ class Bec2File:
         cls, raw_rdr: BytesIO, ext_encryptors: Iterable[Encryptor]
     ) -> tuple[Iterable[AuthBlock], Optional[bytes]]:
         common_session_key = None
-        auth_blocks = []
+        auth_blocks: list[AuthBlock] = []
         while True:
             tlv_tag = int.from_bytes(raw_rdr.read(1), "big")
             tlv_len = int.from_bytes(raw_rdr.read(1), "big")
@@ -538,5 +538,5 @@ class Bec2File:
         config_security_code = config.get((0x0202, 0x82))
         if config_security_code is not None and config_id is not None:
             self.add_auth_block(
-                UpdateAuthBlock(config_security_code, config_id.version)
+                UpdateAuthBlock(config_security_code, config_id.version or 0)
             )

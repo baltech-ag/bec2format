@@ -2,11 +2,17 @@ from io import StringIO
 
 import register_crypto_plugin
 
-from bec2format import CONFIG_SECURITY_CODE_SIZE, Bec2File, Bf3File, EccEncryptor
+from bec2format import (
+    CONFIG_SECURITY_CODE_SIZE,
+    Bec2File,
+    Bf3File,
+    EccEncryptor,
+    configid,
+)
 
 config_security_code = bytes([0x45] * CONFIG_SECURITY_CODE_SIZE)
 
-config = {
+config: configid.ConfDict = {
     (0x1111, 0x22): bytes([0x33, 0x33, 0x33]),
     (0x1111, 0x77): bytes([0x55, 0x66, 0x77, 0x88]),
     (0x0202, 0x82): config_security_code,

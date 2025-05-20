@@ -38,9 +38,9 @@ class ConfigId:
             )
         name = config[(0x620, 0x06)].decode() if (0x620, 0x06) in config else None
         try:
-            customer = int.from_bytes(config[0x620, 0x01], "big")
-            project = int.from_bytes(config[0x620, 0x05], "big")
-            device = int.from_bytes(
+            customer: Optional[int] = int.from_bytes(config[0x620, 0x01], "big")
+            project: Optional[int] = int.from_bytes(config[0x620, 0x05], "big")
+            device: Optional[int] = int.from_bytes(
                 config.get((0x620, 0x02), bytes([0x00, 0x00])), "big"
             )
         except KeyError:
