@@ -5,7 +5,7 @@ jobs:
   verify:
     runs-on: ubuntu-24.04
     env:
-      micropython_tag: 'v1.24.1'
+      micropython_tag: 'v1.25.0'
     strategy:
       matrix:
         interpreter:
