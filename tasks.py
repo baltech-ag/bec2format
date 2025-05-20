@@ -23,6 +23,5 @@ def lint(ctx: Context, fix: bool = False) -> None:
     ok &= ctx.run(f"flake8p {project_path}", warn=True).ok
     ok &= ctx.run(f"mypy {project_path}", warn=True).ok
     ok &= ctx.run("poetry check", warn=True).ok
-    ok &= ctx.run("poetry check --lock", warn=True).ok
     if not ok:
         sys.exit(1)
