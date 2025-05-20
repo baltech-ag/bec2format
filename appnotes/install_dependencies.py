@@ -6,8 +6,8 @@ def install_micropython_dependencies() -> None:
         import mip
     except ImportError:
         raise RuntimeError(
-            "This micropython runtime doesn't provide the mip package mananger. "
-            "You need at least micropython 1.20.0."
+            "This micropython runtime doesn't provide the mip package "
+            "mananger. You need at least micropython 1.20.0."
         )
 
     dependencies = [

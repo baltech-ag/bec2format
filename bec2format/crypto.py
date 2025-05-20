@@ -1,4 +1,4 @@
-from typing import Optional, Type
+from typing import Callable, Optional, Type
 
 
 class AES128:
@@ -57,7 +57,10 @@ class PrivateEccKey:
         raise NotImplementedError()
 
 
-def random_bytes(num_bytes: int) -> bytes:
+RandomBytesFunc = Callable[[int], bytes]
+
+
+def __random_bytes_impl(num_bytes: int) -> bytes:
     raise NotImplementedError()
 
 
@@ -69,7 +72,7 @@ def pad(data: bytes) -> bytes:
 __AES128: Type[AES128] = AES128
 __PublicEccKey: Type[PublicEccKey] = PublicEccKey
 __PrivateEccKey: Type[PrivateEccKey] = PrivateEccKey
-__random_bytes: Type[random_bytes] = random_bytes
+__random_bytes: RandomBytesFunc = __random_bytes_impl
 
 
 def register_AES128(impl: Type[__AES128]) -> Type[__AES128]:
@@ -90,7 +93,7 @@ def register_PrivateEccKey(impl: Type[__PrivateEccKey]) -> Type[__PrivateEccKey]
     return __PrivateEccKey
 
 
-def register_random_bytes(impl: Type[__random_bytes]) -> Type[__random_bytes]:
+def register_random_bytes(impl: RandomBytesFunc) -> RandomBytesFunc:
     global __random_bytes
     __random_bytes = impl
     return __random_bytes

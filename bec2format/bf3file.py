@@ -68,10 +68,8 @@ def conf_dict_to_tlv(conf_dict: ConfDict) -> list[bytes]:
     last_preface = bytes()
     last_postface = bytes()
     for preface, data, postface in tlv_parts:
-        if (
-            len(tlv_blocks[-1] + last_postface + preface + data + postface)
-            > MAX_TLVBLOCK_SIZE
-        ):
+        block = tlv_blocks[-1] + last_postface + preface + data + postface
+        if len(block) > MAX_TLVBLOCK_SIZE:
             tlv_blocks[-1] += last_postface
             tlv_blocks.append(preface + data)
             last_preface, last_postface = preface, postface
@@ -154,7 +152,7 @@ BF2_TAGTYPE_MAP = {
     0x35: (BF3TYPE.PERIPHERAL, HWCID_MAP["SM4200"], BF3FMT.BLOB, BF3INTF.NFC),
     0x39: (BF3TYPE.PERIPHERAL, HWCID_MAP["BGM12X"], BF3FMT.BLOB, None),
     0x3D: (BF3TYPE.PERIPHERAL, HWCID_MAP["PN5180"], BF3FMT.BLOB, BF3INTF.NFC),
-    0x40: (BF3TYPE.PERIPHERAL, HWCID_MAP['SM6300'], BF3FMT.BLOB, BF3INTF.NFC),
+    0x40: (BF3TYPE.PERIPHERAL, HWCID_MAP["SM6300"], BF3FMT.BLOB, BF3INTF.NFC),
     0x48: (None, None, None, None),  # ignore SM6300 activate tag
     0x70: (BF3TYPE.LOADER, None, BF3FMT.BF2COMPATIBLE, None),
     0x83: (BF3TYPE.LOADER, None, BF3FMT.BF2COMPATIBLE, None),
@@ -456,7 +454,7 @@ class Bf3File:
         cls, bf3file: str | TextIO
     ) -> tuple[BytesReader, dict[str, str]]:
         is_file_path = isinstance(bf3file, str)
-        bf3fileobj = open(bf3file, "r") if is_file_path else bf3file
+        bf3fileobj: TextIO = open(bf3file, "r") if is_file_path else bf3file
         try:
             try:
                 comments = {}
@@ -522,7 +520,7 @@ class Bf3File:
 
     @classmethod
     def exec_bf2instrs(
-        cls, bf2_instrs: dict, bf3desc: dict, bf3comments: dict[str, str]
+        cls, bf2_instrs: dict[str, Any], bf3desc: dict, bf3comments: dict[str, str]
     ) -> None:
         if "REBOOT" in bf2_instrs:
             bf3desc[BF3TAG.REBOOT] = b"\x01"
@@ -630,7 +628,7 @@ class Bf3File:
     @staticmethod
     def bf2_convert_payload(bf2lines: list, bf3tag_fmt: int) -> bytes:
         if bf3tag_fmt == BF3FMT.BF2COMPATIBLE:
-            return b"".join(l.rawdata for l in bf2lines)
+            return b"".join(line.rawdata for line in bf2lines)
         elif bf3tag_fmt == BF3FMT.BLOB:
             blocks = Bf3File.bf2_unpack_payload(bf2lines)
             if len(blocks) != 1 or 0 not in blocks:
@@ -656,10 +654,11 @@ class Bf3File:
     ) -> "Bf3File":
         is_file_path = isinstance(bf2file, str)
         bf2fileobj = open(bf2file) if is_file_path else bf2file
-        bf2_fwdata = []
-        bf2_instrs = {}
-        components = []
-        comments = {}
+
+        bf2_fwdata: list[Bf2BinLine] = []
+        bf2_instrs: dict[str, Any] = {}
+        components: list[Bf3Component] = []
+        comments: dict[str, str] = {}
 
         def emit_bf3comp():
             fwtagtype = bf2_fwdata[0].fwtagtype
@@ -703,8 +702,10 @@ class Bf3File:
                 fwtagtype = params[0].fwtagtype
                 if not is_known_tagtype(fwtagtype):
                     raise Bf3FileFormatError(
-                        "TagType 0x{:02X} is not recognized by ConfigEditor"
-                        .format(fwtagtype))
+                        "TagType 0x{:02X} is not recognized by ConfigEditor".format(
+                            fwtagtype
+                        )
+                    )
                 start_new_tag = fwtagtype in BF2_TAGTYPE_MAP and bf2_fwdata
                 if start_new_tag:
                     emit_bf3comp()

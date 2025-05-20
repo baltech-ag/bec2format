@@ -10,6 +10,7 @@ from bec2format import (
     ConfigSecurityCodeEncryptor,
     Encryptor,
     SoftwareCustKeyEncryptor,
+    configid,
 )
 
 soft_encryptor = SoftwareCustKeyEncryptor(crypto_key=bytes([0x12, 0x34] * 8))
@@ -22,7 +23,7 @@ assert decrypted == testdata
 encryptors: list[Encryptor] = [soft_encryptor]
 
 config_security_code = bytes([0x45] * CONFIG_SECURITY_CODE_SIZE)
-config = {
+config: configid.ConfDict = {
     (0x1111, 0x22): bytes([0x33, 0x33, 0x33]),
     (0x1111, 0x77): bytes([0x55, 0x66, 0x77, 0x88]),
     (0x0202, 0x82): config_security_code,
