@@ -124,14 +124,11 @@ class ConfigId:
         if self.is_baltech_naming_scheme:
             project_id = UNKNOWN if self.project is None else self.project
             if self.is_device_settings:
-                fmtstr = "{customer:05}-{projectId:04}-0000-{version:02}"
+                device_id = "0000"
             else:
-                fmtstr = "{customer:05}-{projectId:04}-{device:04}-{version:02}"
-            return fmtstr.format(
-                customer=self.customer,
-                version=self.version,
-                device=self.device,
-                projectId=project_id,
+                device_id = UNKNOWN if self.device is None else self.device
+            return (
+                f"{self.customer:05}-{project_id:04}-{device_id:04}-{self.version:02}"
             )
         else:
             return None
