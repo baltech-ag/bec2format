@@ -10,9 +10,9 @@
 * Compatible with [CPython](https://www.python.org/) >= 3.10
 
 ```bash
-pip install git+https://github.com/baltech-ag/bec2format.git#v1.01.02
+pip install git+https://github.com/baltech-ag/bec2format.git#v1.01.03
 # or
-poetry add git+https://github.com/baltech-ag/bec2format.git#v1.01.02
+poetry add git+https://github.com/baltech-ag/bec2format.git#v1.01.03
 ```
 
 #### Micropython
@@ -22,7 +22,7 @@ poetry add git+https://github.com/baltech-ag/bec2format.git#v1.01.02
 
 ```python
 import mip
-mip.install("github:baltech-ag/bec2format/package.json", version="v1.01.02")
+mip.install("github:baltech-ag/bec2format/package.json", version="v1.01.03")
 ```
 
 ## How to use
