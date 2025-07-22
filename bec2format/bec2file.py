@@ -1,6 +1,6 @@
 from hashlib import sha256
 from io import BytesIO
-from typing import Callable, ClassVar, Iterable, Optional, TextIO, Type, TypeVar
+from typing import Callable,  Iterable, Literal, Optional, TextIO, Type
 
 from .bf3file import Bf3File
 from .bytes_reader import BytesReader
@@ -521,12 +521,16 @@ class Bec2File:
         )
 
     def derive_auth_blocks_from_config(
-        self, config: dict, cust_key_support: bool = False
+        self,
+        config: dict,
+        cust_key_support: bool = False,
+        auth_block_type: Literal["initial", "update"] = "initial",
     ) -> None:
-        if cust_key_support:
-            self.add_auth_block(InitCustKeyAuthBlock())
-        else:
-            self.add_auth_block(InitEccAuthBlock())
+        if auth_block_type == "initial":
+            if cust_key_support:
+                self.add_auth_block(InitCustKeyAuthBlock())
+            else:
+                self.add_auth_block(InitEccAuthBlock())
 
         try:
             config_id = ConfigId.create_from_prj_settings(config)
