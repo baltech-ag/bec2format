@@ -7,7 +7,13 @@ from invoke import Context, task
 @task()
 def install(ctx: Context) -> None:
     """install project dependencies"""
-    ctx.run("poetry install")
+    ctx.run("poetry install --all-extras")
+
+
+@task()
+def test(ctx: Context) -> None:
+    """runs the unit tests"""
+    ctx.run(f"pytest {Path(__file__).parent / 'tests'}")
 
 
 @task()

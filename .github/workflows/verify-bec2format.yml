@@ -2,6 +2,25 @@ name: Verify BEC2 format
 on:
   push:
 jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        id: setup-python
+        with:
+          python-version: '3.10'
+      - name: Tox Cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.tox
+          key: ${{ runner.os }}-python-${{ steps.setup-python.outputs.python-version }}-tox-${{ hashFiles('tox.ini') }}-poetry-${{ hashFiles('poetry.lock') }}
+      - name: Tox Setup
+        run: pip install tox==4.6.0
+      - name: Run unit tests
+        run: tox -- test
   verify:
     runs-on: ubuntu-24.04
     env:
