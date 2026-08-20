@@ -12,6 +12,9 @@ cryptography = { version = "*", optional = true }
 [tool.poetry.extras]
 aes = ["cryptography"]
 
+[tool.poetry.scripts]
+bec2format = "bec2format.cli:main"
+
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
@@ -62,6 +65,10 @@ ignore = [
   "W503",
   # whitespace before ':'
   "E203",
+]
+per-file-ignores = [
+  # asserts are the very purpose of a test
+  "tests/*:S101",
 ]
 
 [build-system]
