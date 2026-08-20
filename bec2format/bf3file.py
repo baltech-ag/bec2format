@@ -616,8 +616,9 @@ class Bf3File:
                 blocks[cur_block_start_adr] = b"".join(cur_block)
                 cur_block = []
                 cur_block_start_adr = payload_offs
-            else:
-                cur_block.append(payload)
+            # the payload of the line that triggered the gap belongs to the
+            # block that starts at this very line
+            cur_block.append(payload)
             if cur_block_start_adr is None:
                 cur_block_start_adr = payload_offs
             cur_block_end_adr = payload_offs + payload_len
