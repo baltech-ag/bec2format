@@ -181,9 +181,14 @@ def test_pack_bf3_takes_over_the_comments_of_the_manifest(
     assert Bf3File.read_file(manifest["dest"]).comments["CustomerId"] == "4711"
 
 
-def test_pack_bf3_skips_tagtypes_without_a_bf3_counterpart(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+def test_pack_bf3_rejects_tagtypes_without_a_bf3_counterpart(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture
 ) -> None:
+    """A control tag must never be submitted to pack-bf3.
+
+    It maps to no BF3 component, so silently dropping it would lose a
+    component of the firmware (the missing SM4200/SM4500 update of FW-898).
+    """
     manifest = create_manifest(tmp_path)
     # 0x34 is the SM4200 prepare tag, which is a control tag without payload
     manifest["components"].insert(
@@ -197,9 +202,11 @@ def test_pack_bf3_skips_tagtypes_without_a_bf3_counterpart(
         },
     )
 
-    assert run_cli(monkeypatch, manifest) == 0
+    assert run_cli(monkeypatch, manifest) == 1
 
-    assert len(Bf3File.read_file(manifest["dest"]).components) == 2
+    stderr = capsys.readouterr().err
+    assert "component 0: tagtype 0x34 is a BF2 control tag" in stderr
+    assert not Path(manifest["dest"]).exists()
 
 
 def test_pack_bf3_encrypts_by_session_key(
