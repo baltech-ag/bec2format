@@ -85,11 +85,12 @@ def _read_payload(path: Any, cmp_name: str) -> bytes:
         _fail("{}: cannot read payload: {}".format(cmp_name, exc))
 
 
-def _create_description(cmp_manifest: dict, cmp_name: str) -> Optional[dict]:
+def _create_description(cmp_manifest: dict, cmp_name: str) -> dict:
     """Derives the BF3 description tags of a component from its manifest.
 
-    Returns None for tagtypes that do not map to a BF3 component at all (the
-    SM4200/SM6300 control tags).
+    Tagtypes that do not map to a BF3 component at all (the SM4200/SM6300
+    control tags) are rejected: a BF3 file has no place for them, so a
+    manifest that submits one would silently lose a component.
     """
     for key in ("tagtype", "format", "payload"):
         if key not in cmp_manifest:
@@ -99,7 +100,10 @@ def _create_description(cmp_manifest: dict, cmp_name: str) -> Optional[dict]:
         _fail("{}: unsupported tagtype {}".format(cmp_name, tagtype))
     bf3type, hwcid, _default_fmt, interface = BF2_TAGTYPE_MAP[tagtype]
     if bf3type is None:
-        return None
+        _fail(
+            "{}: tagtype 0x{:02X} is a BF2 control tag and maps to no BF3 "
+            "component".format(cmp_name, tagtype)
+        )
 
     fmt_name = cmp_manifest["format"]
     if fmt_name not in FORMATS:
@@ -151,12 +155,10 @@ def _create_component(
     instrs: dict,
     comments: dict,
     fw_key: Optional[bytes],
-) -> Optional[Bf3Component]:
+) -> Bf3Component:
     if not isinstance(cmp_manifest, dict):
         _fail("{}: manifest entry must be a JSON object".format(cmp_name))
     desc = _create_description(cmp_manifest, cmp_name)
-    if desc is None:
-        return None
 
     # BF2 instructions accumulate over all components, exactly as they do
     # while parsing a BF2 stream in Bf3File.bf2_import()
@@ -188,11 +190,11 @@ def pack_bf3(manifest: Any) -> None:
     instrs: dict = {}
     components = []
     for cmp_ndx, cmp_manifest in enumerate(manifest["components"]):
-        component = _create_component(
-            cmp_manifest, "component {}".format(cmp_ndx), instrs, comments, fw_key
+        components.append(
+            _create_component(
+                cmp_manifest, "component {}".format(cmp_ndx), instrs, comments, fw_key
+            )
         )
-        if component is not None:
-            components.append(component)
     if not components:
         _fail("manifest does not contain a single BF3 component")
 
