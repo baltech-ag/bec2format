@@ -86,20 +86,16 @@ class ConfigId:
                 version=int(mobj.group(4)),
                 name=mobj.group(6),
             )
-        else:
-            mobj = re.match(r"(.*) \(version (\d{2})\)", configname)
-            if mobj:
-                return cls(
-                    customer=None,
-                    project=None,
-                    device=None,
-                    version=int(mobj.group(2)),
-                    name=str(mobj.group(1)),
-                )
-            else:
-                raise ConfigIdFormatError(
-                    "Invalid ConfigId string format: " + configname
-                )
+        mobj = re.match(r"(.*) \(version (\d{2})\)", configname)
+        if mobj:
+            return cls(
+                customer=None,
+                project=None,
+                device=None,
+                version=int(mobj.group(2)),
+                name=str(mobj.group(1)),
+            )
+        raise ConfigIdFormatError("Invalid ConfigId string format: " + configname)
 
     @property
     def is_device_settings(self) -> bool:
@@ -112,10 +108,9 @@ class ConfigId:
     def __str__(self) -> str:
         if self.is_baltech_naming_scheme:
             return self.cfgid_str + (" " + self.name if self.name else "")
-        else:
-            return "{name} (version {version:02})".format(
-                name=self.name, version=self.version
-            )
+        return "{name} (version {version:02})".format(
+            name=self.name, version=self.version
+        )
 
     @property
     def cfgid_str(self) -> Optional[str]:
@@ -128,8 +123,7 @@ class ConfigId:
             return (
                 f"{self.customer:05}-{project_id:04}-{device_id:04}-{self.version:02}"
             )
-        else:
-            return None
+        return None
 
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, ConfigId):
@@ -140,8 +134,7 @@ class ConfigId:
                 and self.version == other.version
                 and self.name == other.name
             )
-        else:
-            return False
+        return False
 
     def __ne__(self, other: Any) -> bool:
         return not self == other

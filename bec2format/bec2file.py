@@ -26,7 +26,7 @@ CUSTOMER_KEY_SIZE = 10
 BEC2_FILE_SIG = b"BEC2\0"
 
 
-def crc8404B(data, start_value: int = 0xFFFF) -> int:
+def crc8404B(data, start_value: int = 0xFFFF) -> int:  # noqa: N802 - public API
     """
     used for MIC Transponder, Mifare ...
     generator Polynom: x^16 + x^12 + x^5 + 1
@@ -277,9 +277,10 @@ class AuthBlock:
         encryptor_filter: Optional[Callable[[Encryptor], bool]] = None,
     ) -> Encryptor:
         for encryptor in ext_encryptors or []:
-            if isinstance(encryptor, cls.REQUIRED_ENCRYPTOR_CLS):
-                if not encryptor_filter or encryptor_filter(encryptor):
-                    return encryptor
+            if isinstance(encryptor, cls.REQUIRED_ENCRYPTOR_CLS) and (
+                not encryptor_filter or encryptor_filter(encryptor)
+            ):
+                return encryptor
         else:
             if fallback_encryptor is None:
                 raise KeyError(
@@ -287,8 +288,7 @@ class AuthBlock:
                         cls.REQUIRED_ENCRYPTOR_CLS
                     )
                 )
-            else:
-                return fallback_encryptor
+            return fallback_encryptor
 
     def __init__(self, tag: Optional[int] = None) -> None:
         self.tag = self.TAG or tag

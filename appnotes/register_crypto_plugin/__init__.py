@@ -1,6 +1,6 @@
 import os
 
-from bec2format import AES128 as AES128Base
+from bec2format import AES128 as AES128Base  # noqa: N811
 from bec2format import PrivateEccKey as PrivateEccKeyBase
 from bec2format import PublicEccKey as PublicEccKeyBase
 from bec2format import (
@@ -30,8 +30,7 @@ class AES128Proxy(AES128Base):
         decryptor = blockfeeder.Decrypter(mode, padding="none")
         plaintext_padded = decryptor.feed(data)
         plaintext_padded += decryptor.feed()
-        plaintext = plaintext_padded.rstrip(b"\0")
-        return plaintext
+        return plaintext_padded.rstrip(b"\0")
 
     def mac(self, data: bytes) -> bytes:
         return self.encrypt(data)[-16:]
