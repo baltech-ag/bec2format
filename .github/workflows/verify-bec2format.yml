@@ -13,6 +13,17 @@ jobs:
           enable-cache: true
       - name: Run unit tests
         run: uv run --all-extras inv test
+  lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup uv (manages Python via .python-version)
+        uses: astral-sh/setup-uv@v8.1.0
+        with:
+          enable-cache: true
+      - name: Run linters (ruff, mypy, lock file check)
+        run: uv run --all-extras inv lint
   verify:
     runs-on: ubuntu-24.04
     env:
