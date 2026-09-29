@@ -6,16 +6,16 @@ cd "$base_path" || exit
 # install dependencies
 sudo apt-get install build-essential libffi-dev git pkg-config
 
-# clone micropython
+# clone MicroPython
 git clone --branch $micropython_version https://github.com/micropython/micropython
 cd micropython || exit
 
-# compile micropython cross compiler
+# compile MicroPython cross compiler
 cd mpy-cross || exit
 make
 cd ..
 
-# compile micropython unix port
+# compile MicroPython unix port
 cd ports/unix || exit
 make submodules
 make

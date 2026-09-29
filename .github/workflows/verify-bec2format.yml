@@ -49,17 +49,17 @@ jobs:
       - name: Install bec2format for Python
         if: ${{ matrix.interpreter == '.venv/bin/python' }}
         run: uv sync --all-extras --no-editable
-      - name: Cache Micropython
+      - name: Cache MicroPython
         id: cache-micropython
         if: ${{ matrix.interpreter == 'micropython/ports/unix/build-standard/micropython' }}
         uses: actions/cache@v4
         with:
           path: ${{ github.workspace }}/micropython
           key: ${{ runner.os }}-micropython-${{ env.micropython_tag }}
-      - name: Build Micropython
+      - name: Build MicroPython
         if: ${{ matrix.interpreter == 'micropython/ports/unix/build-standard/micropython' && steps.cache-micropython.outputs.cache-hit != 'true' }}
         run:  ${{ github.workspace }}/.github/workflows/build_micropython.sh ${{ github.workspace }} ${{ env.micropython_tag }}
-      - name: Install bec2format for Micropython and its dependencies
+      - name: Install bec2format for MicroPython and its dependencies
         if: ${{ matrix.interpreter == 'micropython/ports/unix/build-standard/micropython' }}
         run: |
           rm --recursive --force $HOME/.micropython/lib/bec2format
