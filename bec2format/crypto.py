@@ -5,6 +5,11 @@ class AES128:
     BLOCK_SIZE = 16
     KEY_SIZE = 16
 
+    # AesEncryptorMixin sets this before each use. The bundled implementations
+    # read _iv instead (None = zero IV, the same value), but implementations
+    # registered by users may rely on it.
+    iv: Optional[bytes]
+
     def __init__(self, key: bytes, iv: Optional[bytes] = None) -> None:
         self._key = key
         self._iv = iv
@@ -75,19 +80,19 @@ __PrivateEccKey: Type[PrivateEccKey] = PrivateEccKey
 __random_bytes: RandomBytesFunc = __random_bytes_impl
 
 
-def register_AES128(impl: Type[__AES128]) -> Type[__AES128]:  # noqa: N802 - public API
+def register_AES128(impl: Type[AES128]) -> Type[AES128]:  # noqa: N802 - public API
     global __AES128
     __AES128 = impl
     return __AES128
 
 
-def register_PublicEccKey(impl: Type[__PublicEccKey]) -> Type[__PublicEccKey]:  # noqa: N802 - public API
+def register_PublicEccKey(impl: Type[PublicEccKey]) -> Type[PublicEccKey]:  # noqa: N802 - public API
     global __PublicEccKey
     __PublicEccKey = impl
     return __PublicEccKey
 
 
-def register_PrivateEccKey(impl: Type[__PrivateEccKey]) -> Type[__PrivateEccKey]:  # noqa: N802 - public API
+def register_PrivateEccKey(impl: Type[PrivateEccKey]) -> Type[PrivateEccKey]:  # noqa: N802 - public API
     global __PrivateEccKey
     __PrivateEccKey = impl
     return __PrivateEccKey
@@ -99,19 +104,19 @@ def register_random_bytes(impl: RandomBytesFunc) -> RandomBytesFunc:
     return __random_bytes
 
 
-def create_AES128(key: bytes, iv: Optional[bytes] = None) -> __AES128:  # noqa: N802 - public API
+def create_AES128(key: bytes, iv: Optional[bytes] = None) -> AES128:  # noqa: N802 - public API
     return __AES128(key, iv)
 
 
-def create_public_ecc_key_from_der_fmt(der_fmt: bytes) -> __PublicEccKey:
+def create_public_ecc_key_from_der_fmt(der_fmt: bytes) -> PublicEccKey:
     return __PublicEccKey.create_from_der_fmt(der_fmt)
 
 
-def create_public_ecc_key_from_raw_fmt(raw_fmt: bytes) -> __PublicEccKey:
+def create_public_ecc_key_from_raw_fmt(raw_fmt: bytes) -> PublicEccKey:
     return __PublicEccKey.create_from_raw_fmt(raw_fmt)
 
 
-def generate_private_ecc_key() -> __PrivateEccKey:
+def generate_private_ecc_key() -> PrivateEccKey:
     return __PrivateEccKey.generate()
 
 
