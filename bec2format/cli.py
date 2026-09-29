@@ -1,7 +1,7 @@
 """Command line interface of bec2format.
 
 This module must NOT be imported by ``bec2format/__init__.py``: the whole
-package directory is copied into the micropython library, where neither
+package directory is copied into the MicroPython library, where neither
 ``argparse`` nor ``json`` is available. It is loaded exclusively through the
 ``bec2format`` console script.
 """

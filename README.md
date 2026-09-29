@@ -17,9 +17,9 @@ poetry add git+https://github.com/baltech-ag/bec2format.git#v1.04.00
 uv add git+https://github.com/baltech-ag/bec2format.git@v1.04.00
 ```
 
-#### Micropython
+#### MicroPython
 
-* Compatible with [Micropython](https://micropython.org/) >= 1.20.0
+* Compatible with [MicroPython](https://micropython.org/) >= 1.20.0
 * Tested with the [Unix port](https://github.com/micropython/micropython/tree/v1.20.0/ports/unix) on Ubuntu 20.04
 
 ```python
@@ -50,7 +50,7 @@ Bf3File(
 ## Command line interface
 
 The `bec2format` console script is available with the CPython installation
-(it is not part of the micropython package).
+(it is not part of the MicroPython package).
 
 ### `bec2format pack-bf3`
 
@@ -132,12 +132,12 @@ cd appnotes
 py create_bec2file_with_ec_key.py
 ```
 
-#### Micropython
+#### MicroPython
 
 ```bash
 git clone https://github.com/baltech-ag/bec2format.git
 cd bec2format
 cd appnotes
-micropython install_depepencies.py
+micropython install_dependencies.py
 micropython create_bec2file_with_ec_key.py
 ```
