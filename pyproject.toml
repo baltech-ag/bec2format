@@ -1,6 +1,6 @@
 [project]
 name = "bec2format"
-version = "1.04.00"
+version = "1.05.00"
 description = "BALTECH BEC2 file format"
 authors = [{ name = "Baltech AG", email = "info@baltech.de" }]
 license = "MIT"
