@@ -48,8 +48,7 @@ class ConfigId:
             customer = device = project = None
             if not name:
                 raise MissingProjectSettingsNameError(
-                    "name is required if not corresponding to baltech naming "
-                    "convention"
+                    "name is required if not corresponding to baltech naming convention"
                 )
         return cls(customer, project, device, version, name)
 
@@ -72,8 +71,7 @@ class ConfigId:
             customer = device = None
             if not name:
                 raise MissingDeviceSettingsNameError(
-                    "name is required if not corresponding to baltech naming "
-                    "convention"
+                    "name is required if not corresponding to baltech naming convention"
                 )
         return cls(customer, 0000, device, version, name)
 

@@ -24,6 +24,7 @@ uv add git+https://github.com/baltech-ag/bec2format.git@v1.04.00
 
 ```python
 import mip
+
 mip.install("github:baltech-ag/bec2format/package.json", version="v1.04.00")
 ```
 
@@ -37,7 +38,7 @@ Bf3File(
     [
         Bf3Component(
             {
-                0xC1: bytes([0x11, 0x22, 0x33]), 
+                0xC1: bytes([0x11, 0x22, 0x33]),
                 0xC3: bytes([0x12, 0x33]),
             },
             bytes(list(range(0x100))),

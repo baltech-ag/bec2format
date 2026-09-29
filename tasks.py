@@ -20,13 +20,11 @@ def test(ctx: Context) -> None:
 def lint(ctx: Context, fix: bool = False) -> None:
     """runs linting jobs"""
     project_path = Path(__file__).parent
+    fix_flag = "--fix" if fix else ""
     check_flag = "" if fix else "--check"
-    ok = ctx.run(f"black {check_flag} {project_path}", warn=True).ok
-    ok &= ctx.run(
-        f"isort --settings-path={project_path / 'pyproject.toml'} {check_flag} {project_path}",
-        warn=True,
-    ).ok
-    ok &= ctx.run(f"flake8p {project_path}", warn=True).ok
+    # with --fix, fixes (e.g. import sorting) have to run before formatting
+    ok = ctx.run(f"ruff check {fix_flag} {project_path}", warn=True).ok
+    ok &= ctx.run(f"ruff format {check_flag} {project_path}", warn=True).ok
     ok &= ctx.run(f"mypy {project_path}", warn=True).ok
     ok &= ctx.run("uv lock --check", warn=True).ok
     if not ok:

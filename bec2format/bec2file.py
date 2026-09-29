@@ -1,6 +1,6 @@
 from hashlib import sha256
 from io import BytesIO
-from typing import Callable,  Iterable, Literal, Optional, TextIO, Type
+from typing import Callable, Iterable, Literal, Optional, TextIO, Type
 
 from .bf3file import Bf3File
 from .bytes_reader import BytesReader
@@ -514,7 +514,7 @@ class Bec2File:
         return auth_blocks, common_session_key
 
     def __repr__(self) -> str:
-        return "Bec2File({bf3file!r}, {auth_blocks!r}, " "{session_key!r})".format(
+        return "Bec2File({bf3file!r}, {auth_blocks!r}, {session_key!r})".format(
             bf3file=self.bf3file,
             auth_blocks=self.auth_blocks,
             session_key=self.session_key,

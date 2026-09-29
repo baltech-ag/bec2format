@@ -20,12 +20,7 @@ dev = [
     "invoke>=2,<3",
     "pytest",
     "mypy",
-    "black",
-    "isort",
-    "flake8",
-    "flake8-awesome",
-    "flake8-simplify",
-    "Flake8-pyproject",
+    "ruff",
     "types-invoke",
 ]
 
@@ -35,46 +30,37 @@ exclude = [
   "appnotes/register_crypto_plugin/pyaes/*",
 ]
 
-[tool.isort]
-profile = "black"
-extend_skip = [".tox-venv"]
-extend_skip_glob = [
-  "/appnotes/register_crypto_plugin/ecdsa/*",
-  "/appnotes/register_crypto_plugin/pyaes/*",
-]
-
-[tool.black]
-skip-magic-trailing-comma = true
-extend-exclude = "/appnotes/register_crypto_plugin/(ecdsa|pyaes)/"
-
-[tool.flake8]
-exclude = [
-  ".git",
-  ".github",
-  ".mypy_cache",
-  ".tox",
-  ".tox-venv",
-  ".venv",
-  "__pycache__",
+[tool.ruff]
+extend-exclude = [
   "appnotes/register_crypto_plugin/ecdsa",
   "appnotes/register_crypto_plugin/pyaes",
 ]
+
+[tool.ruff.lint]
+select = [
+  "E", "W", "F",  # pycodestyle, pyflakes
+  "I",            # isort
+  "S",            # flake8-bandit
+  "T10",          # flake8-breakpoint
+  "B",            # flake8-bugbear
+  "A",            # flake8-builtins
+  "C4",           # flake8-comprehensions
+  "ERA",          # flake8-eradicate
+  "G",            # flake8-logging-format
+  "T20",          # flake8-print
+  "PT",           # flake8-pytest-style
+  "RET",          # flake8-return
+  "N",            # pep8-naming
+  "SIM",          # flake8-simplify
+]
 ignore = [
-  # line too long handled by black
+  # line too long handled by the formatter
   "E501",
-  # invoke not listed in dependencies
-  "I900",
-  # don`t use "[on_true] if [expression] else [on_false]" syntax
-  "IF100",
-  # line break before binary operator: collides with black
-  "W503",
-  # whitespace before ':'
-  "E203",
 ]
-per-file-ignores = [
-  # asserts are the very purpose of a test
-  "tests/*:S101",
-]
+
+[tool.ruff.lint.per-file-ignores]
+# asserts are the very purpose of a test
+"tests/*" = ["S101"]
 
 [build-system]
 requires = ["uv_build>=0.12.20,<0.13"]
