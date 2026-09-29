@@ -56,11 +56,17 @@ select = [
 ignore = [
   # line too long handled by the formatter
   "E501",
+  # raise ... from err: MicroPython prints "exception chaining not supported"
+  "B904",
 ]
 
 [tool.ruff.lint.per-file-ignores]
 # asserts are the very purpose of a test
 "tests/*" = ["S101"]
+# re-exports (the public API of the package) and imports for side effects
+"bec2format/__init__.py" = ["F401"]
+# example scripts check and print their results
+"appnotes/*.py" = ["S101", "T201"]
 
 [build-system]
 requires = ["uv_build>=0.12.20,<0.13"]

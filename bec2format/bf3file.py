@@ -274,9 +274,8 @@ class Bf3Component:
     def get_raw_data(self, session_key: bytes) -> bytes:
         if not self.encrypt_by_session_key:
             return self.blob
-        else:
-            cipher = create_AES128(session_key)
-            return cipher.encrypt(pad(self.blob))
+        cipher = create_AES128(session_key)
+        return cipher.encrypt(pad(self.blob))
 
 
 class Bf3File:
@@ -334,12 +333,12 @@ class Bf3File:
         bf3file: str | TextIO, comments: dict[str, str], rawdata: bytes
     ) -> None:
         is_file_path = isinstance(bf3file, str)
-        bf3fileobj = open(bf3file, "w", newline="\r\n") if is_file_path else bf3file
+        bf3fileobj = open(bf3file, "w", newline="\r\n") if is_file_path else bf3file  # noqa: SIM115 - closed in finally
         try:
             sorted_comments = comments.items()
             if not isinstance(comments, dict):
                 sorted_comments.sort()
-            lines = map(lambda tup: "{}: {}\n".format(*tup), sorted_comments)
+            lines = ("{}: {}\n".format(*tup) for tup in sorted_comments)
             bf3fileobj.write("".join(lines))
             bf3fileobj.write("\n")
             for pos in range(0, len(rawdata) + END_OF_LINE // 2 - 1, END_OF_LINE // 2):
@@ -437,9 +436,8 @@ class Bf3File:
             if payload_adr != raw_rdr.tell():
                 raise Bf3FileFormatError("Invalid Address reference")
             payload = raw_rdr.read(total_len)
-            if check_cmac:
-                if cmac(payload, session_key) != payload_cmac:
-                    raise Bf3FileFormatError("Invalid CMAC of BF3 component")
+            if check_cmac and cmac(payload, session_key) != payload_cmac:
+                raise Bf3FileFormatError("Invalid CMAC of BF3 component")
             if description.get(BF3TAG.ENC) == BF3ENC.SESSIONKEY:
                 comp = Bf3Component.from_encrypted_raw_data(
                     description, payload, payload_len, session_key
@@ -455,7 +453,7 @@ class Bf3File:
         cls, bf3file: str | TextIO
     ) -> tuple[BytesReader, dict[str, str]]:
         is_file_path = isinstance(bf3file, str)
-        bf3fileobj: TextIO = open(bf3file, "r") if is_file_path else bf3file
+        bf3fileobj: TextIO = open(bf3file, "r") if is_file_path else bf3file  # noqa: SIM115 - closed in finally
         try:
             try:
                 comments = {}
@@ -631,7 +629,7 @@ class Bf3File:
     def bf2_convert_payload(bf2lines: list, bf3tag_fmt: int) -> bytes:
         if bf3tag_fmt == BF3FMT.BF2COMPATIBLE:
             return b"".join(line.rawdata for line in bf2lines)
-        elif bf3tag_fmt == BF3FMT.BLOB:
+        if bf3tag_fmt == BF3FMT.BLOB:
             blocks = Bf3File.bf2_unpack_payload(bf2lines)
             if len(blocks) != 1 or 0 not in blocks:
                 raise Bf3FileFormatError(
@@ -639,7 +637,7 @@ class Bf3File:
                     "address 0 and must not have gaps".format(bf2lines[0].fwtagtype)
                 )
             return blocks[0]
-        elif bf3tag_fmt == BF3FMT.MEMORYIMAGE:
+        if bf3tag_fmt == BF3FMT.MEMORYIMAGE:
             content = b""
             blocks = Bf3File.bf2_unpack_payload(bf2lines)
             for adr, data in sorted(blocks.items()):
@@ -647,15 +645,14 @@ class Bf3File:
                 content += len(data).to_bytes(4, "big")
                 content += data
             return content
-        else:
-            raise NotImplementedError("Format not supported by bf2 importer")
+        raise NotImplementedError("Format not supported by bf2 importer")
 
     @classmethod
     def bf2_import(
         cls, bf2file: str | TextIO, enforce_bf3_compatibility: bool = True
     ) -> "Bf3File":
         is_file_path = isinstance(bf2file, str)
-        bf2fileobj = open(bf2file) if is_file_path else bf2file
+        bf2fileobj = open(bf2file) if is_file_path else bf2file  # noqa: SIM115 - closed in finally
 
         bf2_fwdata: list[Bf2BinLine] = []
         bf2_instrs: dict[str, Any] = {}
@@ -739,7 +736,7 @@ class Bf3File:
     def set_config(
         self, config: dict, additional_tvl_blocks: Iterable[bytes] = ()
     ) -> None:
-        try:
+        try:  # noqa: SIM105 - no contextlib on MicroPython
             del self.components[self._get_config_ndx()]
         except KeyError:
             pass

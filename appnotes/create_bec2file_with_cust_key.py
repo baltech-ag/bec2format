@@ -1,6 +1,6 @@
 from io import StringIO
 
-import register_crypto_plugin
+import register_crypto_plugin  # noqa: F401 - registers the crypto implementation
 
 from bec2format import (
     CONFIG_SECURITY_CODE_SIZE,

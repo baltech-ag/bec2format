@@ -37,7 +37,7 @@ from .error import (
     UnsupportedLegacyFirmwareError,
 )
 
-try:
+try:  # noqa: SIM105 - no contextlib on MicroPython
     from .extras import aes
 except ImportError:
     pass

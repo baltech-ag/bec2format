@@ -75,19 +75,19 @@ __PrivateEccKey: Type[PrivateEccKey] = PrivateEccKey
 __random_bytes: RandomBytesFunc = __random_bytes_impl
 
 
-def register_AES128(impl: Type[__AES128]) -> Type[__AES128]:
+def register_AES128(impl: Type[__AES128]) -> Type[__AES128]:  # noqa: N802 - public API
     global __AES128
     __AES128 = impl
     return __AES128
 
 
-def register_PublicEccKey(impl: Type[__PublicEccKey]) -> Type[__PublicEccKey]:
+def register_PublicEccKey(impl: Type[__PublicEccKey]) -> Type[__PublicEccKey]:  # noqa: N802 - public API
     global __PublicEccKey
     __PublicEccKey = impl
     return __PublicEccKey
 
 
-def register_PrivateEccKey(impl: Type[__PrivateEccKey]) -> Type[__PrivateEccKey]:
+def register_PrivateEccKey(impl: Type[__PrivateEccKey]) -> Type[__PrivateEccKey]:  # noqa: N802 - public API
     global __PrivateEccKey
     __PrivateEccKey = impl
     return __PrivateEccKey
@@ -99,7 +99,7 @@ def register_random_bytes(impl: RandomBytesFunc) -> RandomBytesFunc:
     return __random_bytes
 
 
-def create_AES128(key: bytes, iv: Optional[bytes] = None) -> __AES128:
+def create_AES128(key: bytes, iv: Optional[bytes] = None) -> __AES128:  # noqa: N802 - public API
     return __AES128(key, iv)
 
 
