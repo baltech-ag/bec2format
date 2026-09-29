@@ -1,31 +1,33 @@
-[tool.poetry]
+[project]
 name = "bec2format"
 version = "1.04.00"
 description = "BALTECH BEC2 file format"
-authors = ["Baltech AG <info@baltech.de>"]
+authors = [{ name = "Baltech AG", email = "info@baltech.de" }]
 license = "MIT"
+license-files = ["LICENSE.md"]
+requires-python = ">=3.10,<4.0"
+dependencies = []
 
-[tool.poetry.dependencies]
-python = ">=3.10,<4.0"
-cryptography = { version = "*", optional = true }
-
-[tool.poetry.extras]
+[project.optional-dependencies]
 aes = ["cryptography"]
 
-[tool.poetry.scripts]
+[project.scripts]
 bec2format = "bec2format.cli:main"
 
-
-[tool.poetry.dev-dependencies]
-pytest = "*"
-mypy = "*"
-black = "*"
-isort = "*"
-flake8 = "*"
-flake8-awesome = "*"
-flake8-simplify = "*"
-Flake8-pyproject = "*"
-types-invoke = "*"
+[dependency-groups]
+dev = [
+    "uv",
+    "invoke>=2,<3",
+    "pytest",
+    "mypy",
+    "black",
+    "isort",
+    "flake8",
+    "flake8-awesome",
+    "flake8-simplify",
+    "Flake8-pyproject",
+    "types-invoke",
+]
 
 [tool.mypy]
 exclude = [
@@ -35,6 +37,7 @@ exclude = [
 
 [tool.isort]
 profile = "black"
+extend_skip = [".tox-venv"]
 extend_skip_glob = [
   "/appnotes/register_crypto_plugin/ecdsa/*",
   "/appnotes/register_crypto_plugin/pyaes/*",
@@ -50,6 +53,8 @@ exclude = [
   ".github",
   ".mypy_cache",
   ".tox",
+  ".tox-venv",
+  ".venv",
   "__pycache__",
   "appnotes/register_crypto_plugin/ecdsa",
   "appnotes/register_crypto_plugin/pyaes",
@@ -72,5 +77,10 @@ per-file-ignores = [
 ]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["uv_build>=0.12.20,<0.13"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+# flat layout: the package lives in ./bec2format, not in ./src/bec2format
+module-root = ""
+
