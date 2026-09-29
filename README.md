@@ -10,11 +10,11 @@
 * Compatible with [CPython](https://www.python.org/) >= 3.10
 
 ```bash
-pip install git+https://github.com/baltech-ag/bec2format.git@v1.04.00
+pip install git+https://github.com/baltech-ag/bec2format.git@v1.05.00
 # or
-poetry add git+https://github.com/baltech-ag/bec2format.git#v1.04.00
+poetry add git+https://github.com/baltech-ag/bec2format.git#v1.05.00
 # or
-uv add git+https://github.com/baltech-ag/bec2format.git@v1.04.00
+uv add git+https://github.com/baltech-ag/bec2format.git@v1.05.00
 ```
 
 #### MicroPython
@@ -29,7 +29,7 @@ uv add git+https://github.com/baltech-ag/bec2format.git@v1.04.00
 ```python
 import mip
 
-mip.install("github:baltech-ag/bec2format/package.json", version="v1.04.00")
+mip.install("github:baltech-ag/bec2format/package.json", version="v1.05.00")
 ```
 
 ## How to use
@@ -74,7 +74,7 @@ Components that need AES (`"encryption": "FWKEY"` or `"SESSIONKEY"`) require an
 AES implementation, so install the package with the `aes` extra:
 
 ```bash
-uvx --from "bec2format[aes] @ git+https://github.com/baltech-ag/bec2format.git@v1.04.00" \
+uvx --from "bec2format[aes] @ git+https://github.com/baltech-ag/bec2format.git@v1.05.00" \
     bec2format pack-bf3 < manifest.json
 ```
 
