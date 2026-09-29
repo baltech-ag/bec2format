@@ -7,20 +7,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        id: setup-python
+      - name: Setup uv (manages Python via .python-version)
+        uses: astral-sh/setup-uv@v8.1.0
         with:
-          python-version: '3.10'
-      - name: Tox Cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ github.workspace }}/.tox
-          key: ${{ runner.os }}-python-${{ steps.setup-python.outputs.python-version }}-tox-${{ hashFiles('tox.ini') }}-poetry-${{ hashFiles('poetry.lock') }}
-      - name: Tox Setup
-        run: pip install tox==4.6.0
+          enable-cache: true
       - name: Run unit tests
-        run: tox -- test
+        run: uv run --all-extras inv test
   verify:
     runs-on: ubuntu-24.04
     env:
@@ -28,7 +20,7 @@ jobs:
     strategy:
       matrix:
         interpreter:
-          - .tox/py310/bin/python
+          - .venv/bin/python
           - micropython/ports/unix/build-standard/micropython
         script:
           - create_bec2file_with_cust_key.py
@@ -36,29 +28,16 @@ jobs:
           - create_bf3file.py
           - verify_dh_secret.py
     steps:
-      - name: Setup Python
-        if: ${{ matrix.interpreter == '.tox/py310/bin/python' }}
-        uses: actions/setup-python@v5
-        id: setup-python
-        with:
-          python-version: '3.10'
-      - name: Tox Cache
-        if: ${{ matrix.interpreter == '.tox/py310/bin/python' }}
-        uses: actions/cache@v4
-        with:
-          path: ${{ github.workspace }}/.tox
-          key: ${{ runner.os }}-python-${{ steps.setup-python.outputs.python-version }}-tox-${{ hashFiles('tox.ini') }}-poetry-${{ hashFiles('poetry.lock') }}
-      - name: Tox Setup
-        if: ${{ matrix.interpreter == '.tox/py310/bin/python' }}
-        run:  pip install tox==4.6.0
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Prepare Python
-        if: ${{ matrix.interpreter == '.tox/py310/bin/python' }}
-        run: tox
+      - name: Setup uv (manages Python via .python-version)
+        if: ${{ matrix.interpreter == '.venv/bin/python' }}
+        uses: astral-sh/setup-uv@v8.1.0
+        with:
+          enable-cache: true
       - name: Install bec2format for Python
-        if: ${{ matrix.interpreter == '.tox/py310/bin/python' }}
-        run: pip install ${{ github.workspace }}
+        if: ${{ matrix.interpreter == '.venv/bin/python' }}
+        run: uv sync --all-extras --no-editable
       - name: Cache Micropython
         id: cache-micropython
         if: ${{ matrix.interpreter == 'micropython/ports/unix/build-standard/micropython' }}

@@ -1,6 +1,8 @@
 /.idea/
 !/.idea/watcherTasks.xml
 /.tox/
+/.tox-venv/
+/.venv/
 .mypy_cache/
 __pycache__/
 /.pytest_cache/

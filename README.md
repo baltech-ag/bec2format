@@ -10,9 +10,11 @@
 * Compatible with [CPython](https://www.python.org/) >= 3.10
 
 ```bash
-pip install git+https://github.com/baltech-ag/bec2format.git#v1.04.00
+pip install git+https://github.com/baltech-ag/bec2format.git@v1.04.00
 # or
 poetry add git+https://github.com/baltech-ag/bec2format.git#v1.04.00
+# or
+uv add git+https://github.com/baltech-ag/bec2format.git@v1.04.00
 ```
 
 #### Micropython
