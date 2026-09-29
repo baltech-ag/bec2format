@@ -19,7 +19,7 @@ class ConfigId:
         customer: Optional[int],
         project: Optional[int],
         device: Optional[int],
-        version: Optional[int],
+        version: int,
         name: Optional[str],
     ):
         self.customer = customer if customer != UNKNOWN else None
@@ -62,8 +62,8 @@ class ConfigId:
             )
         name = config[(0x620, 0x03)].decode() if (0x620, 0x03) in config else None
         try:
-            customer = int.from_bytes(config[0x620, 0x01], "big")
-            device = int.from_bytes(
+            customer: Optional[int] = int.from_bytes(config[0x620, 0x01], "big")
+            device: Optional[int] = int.from_bytes(
                 config.get((0x620, 0x02), bytes([0x00, 0x00])), "big"
             )
         except KeyError:
@@ -107,7 +107,7 @@ class ConfigId:
 
     def __str__(self) -> str:
         if self.is_baltech_naming_scheme:
-            return self.cfgid_str + (" " + self.name if self.name else "")
+            return self._format_cfgid() + (" " + self.name if self.name else "")
         return "{name} (version {version:02})".format(
             name=self.name, version=self.version
         )
@@ -115,15 +115,17 @@ class ConfigId:
     @property
     def cfgid_str(self) -> Optional[str]:
         if self.is_baltech_naming_scheme:
-            project_id = UNKNOWN if self.project is None else self.project
-            if self.is_device_settings:
-                device_id = "0000"
-            else:
-                device_id = UNKNOWN if self.device is None else self.device
-            return (
-                f"{self.customer:05}-{project_id:04}-{device_id:04}-{self.version:02}"
-            )
+            return self._format_cfgid()
         return None
+
+    def _format_cfgid(self) -> str:
+        """Config ID string, only valid for the Baltech naming scheme"""
+        project_id = UNKNOWN if self.project is None else self.project
+        if self.is_device_settings:
+            device_id = 0
+        else:
+            device_id = UNKNOWN if self.device is None else self.device
+        return f"{self.customer:05}-{project_id:04}-{device_id:04}-{self.version:02}"
 
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, ConfigId):

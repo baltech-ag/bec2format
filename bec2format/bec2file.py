@@ -291,7 +291,8 @@ class AuthBlock:
             return fallback_encryptor
 
     def __init__(self, tag: Optional[int] = None) -> None:
-        self.tag = self.TAG or tag
+        # never None: subclasses define TAG, UnknownAuthBlock passes its tag
+        self.tag: int = self.TAG or tag  # type: ignore[assignment]
 
     def pack(
         self, session_key: bytes, ext_encryptors: Iterable[Encryptor] = ()
@@ -338,22 +339,28 @@ class InitEccAuthBlock(AuthBlock):
         self.key_selector = key_selector
 
     def pack(
-        self, session_key: bytes, ext_encryptors: Iterable[KeySelectorEncryptor] = ()
+        self, session_key: bytes, ext_encryptors: Iterable[Encryptor] = ()
     ) -> bytes:
         encryptor = self.select_encryptor(
             ext_encryptors,
             fallback_encryptor=EccEncryptor(),
-            encryptor_filter=lambda e: e.key_selector == self.key_selector,
+            encryptor_filter=lambda e: (
+                isinstance(e, KeySelectorEncryptor)
+                and e.key_selector == self.key_selector
+            ),
         )
         return self.key_selector.to_bytes(1, "big") + encryptor.encrypt(session_key)
 
     @classmethod
     def unpack(
-        cls, raw: bytes, ext_encryptors: Iterable[KeySelectorEncryptor] = ()
+        cls, raw: bytes, ext_encryptors: Iterable[Encryptor] = ()
     ) -> tuple[AuthBlock, bytes]:
         key_selector = raw[0]
         encryptor = cls.select_encryptor(
-            ext_encryptors, encryptor_filter=lambda e: e.key_selector == key_selector
+            ext_encryptors,
+            encryptor_filter=lambda e: (
+                isinstance(e, KeySelectorEncryptor) and e.key_selector == key_selector
+            ),
         )
         session_key = encryptor.decrypt(raw[1:])
         return InitEccAuthBlock(key_selector), session_key
@@ -421,7 +428,9 @@ class UnknownAuthBlock(AuthBlock):
 
 class Bec2File:
     AUTH_BLOCK_CLS_MAP: dict[int, Type[AuthBlock]] = {
-        c.TAG: c for c in [InitCustKeyAuthBlock, InitEccAuthBlock, UpdateAuthBlock]
+        InitCustKeyAuthBlock.TAG: InitCustKeyAuthBlock,
+        InitEccAuthBlock.TAG: InitEccAuthBlock,
+        UpdateAuthBlock.TAG: UpdateAuthBlock,
     }
 
     def __init__(

@@ -84,15 +84,20 @@ def conf_dict_to_tlv(conf_dict: ConfDict) -> list[bytes]:
     return tlv_blocks
 
 
-def conf_dict_to_list(conf_dict: ConfDict) -> list[tuple[int, int, bytes]]:
-    """Converts a configuration Dictionary to a sorted list of value tuples"""
-    conf_list = [
+def conf_dict_to_list(
+    conf_dict: ConfDict,
+) -> list[tuple[int, Optional[int], Optional[bytes]]]:
+    """Converts a configuration Dictionary to a sorted list of value tuples
+
+    Entries with value or content None (deleting a key or value) come first.
+    """
+    conf_list: list[tuple[int, Optional[int], Optional[bytes]]] = [
         (key, value, content)
         for (key, value), content in conf_dict.items()
         if value is not None and content is not None
     ]
     conf_list.sort()
-    del_key_list = [
+    del_key_list: list[tuple[int, Optional[int], Optional[bytes]]] = [
         (key, value, content)
         for (key, value), content in conf_dict.items()
         if value is None or content is None
@@ -332,8 +337,9 @@ class Bf3File:
     def write_bf3_format(
         bf3file: str | TextIO, comments: dict[str, str], rawdata: bytes
     ) -> None:
-        is_file_path = isinstance(bf3file, str)
-        bf3fileobj = open(bf3file, "w", newline="\r\n") if is_file_path else bf3file  # noqa: SIM115 - closed in finally
+        bf3fileobj = (
+            open(bf3file, "w", newline="\r\n") if isinstance(bf3file, str) else bf3file  # noqa: SIM115 - closed in finally
+        )
         try:
             sorted_comments = comments.items()
             if not isinstance(comments, dict):
@@ -345,7 +351,7 @@ class Bf3File:
                 line = rawdata[pos : pos + END_OF_LINE // 2]
                 bf3fileobj.write(line.hex().upper() + "\n")
         finally:
-            if is_file_path:
+            if isinstance(bf3file, str):
                 bf3fileobj.close()
 
     def write_file(
@@ -452,8 +458,7 @@ class Bf3File:
     def parse_bf3_file(
         cls, bf3file: str | TextIO
     ) -> tuple[BytesReader, dict[str, str]]:
-        is_file_path = isinstance(bf3file, str)
-        bf3fileobj: TextIO = open(bf3file, "r") if is_file_path else bf3file  # noqa: SIM115 - closed in finally
+        bf3fileobj: TextIO = open(bf3file, "r") if isinstance(bf3file, str) else bf3file  # noqa: SIM115 - closed in finally
         try:
             try:
                 comments = {}
@@ -470,7 +475,7 @@ class Bf3File:
             except ValueError:
                 raise Bf3FileFormatError("Binary Data of BF3 file not in Hex format")
         finally:
-            if is_file_path:
+            if isinstance(bf3file, str):
                 bf3fileobj.close()
         raw_rdr = BytesReader(binary, "BF3 files Binary Data")
         return raw_rdr, comments
@@ -601,9 +606,9 @@ class Bf3File:
     def bf2_unpack_payload(bf2lines: list[Bf2BinLine]) -> dict[int, bytes]:
         blocks: dict[int, bytes] = {}
         start_tagtype = bf2lines[0].fwtagtype
-        cur_block_start_adr = None
+        cur_block_start_adr = 0
         cur_block_end_adr = 0
-        cur_block = []
+        cur_block: list[bytes] = []
         for bf2line in bf2lines:
             fwtag_rdr = BytesReader(bf2line.fwtag, "BF2 Line")
             payload_len = fwtag_rdr.read_int(1) - 2
@@ -611,15 +616,15 @@ class Bf3File:
                 bf2line.fwtagtype - start_tagtype
             ) * 0x10000 + fwtag_rdr.read_int(2)
             payload = fwtag_rdr.read(payload_len)
-            if payload_offs != cur_block_end_adr and cur_block:
+            if not cur_block:
+                cur_block_start_adr = payload_offs
+            elif payload_offs != cur_block_end_adr:
                 blocks[cur_block_start_adr] = b"".join(cur_block)
                 cur_block = []
                 cur_block_start_adr = payload_offs
             # the payload of the line that triggered the gap belongs to the
             # block that starts at this very line
             cur_block.append(payload)
-            if cur_block_start_adr is None:
-                cur_block_start_adr = payload_offs
             cur_block_end_adr = payload_offs + payload_len
         if cur_block:
             blocks[cur_block_start_adr] = b"".join(cur_block)
@@ -651,8 +656,7 @@ class Bf3File:
     def bf2_import(
         cls, bf2file: str | TextIO, enforce_bf3_compatibility: bool = True
     ) -> "Bf3File":
-        is_file_path = isinstance(bf2file, str)
-        bf2fileobj = open(bf2file) if is_file_path else bf2file  # noqa: SIM115 - closed in finally
+        bf2fileobj = open(bf2file) if isinstance(bf2file, str) else bf2file  # noqa: SIM115 - closed in finally
 
         bf2_fwdata: list[Bf2BinLine] = []
         bf2_instrs: dict[str, Any] = {}
@@ -694,7 +698,7 @@ class Bf3File:
         except (ValueError, IndexError, KeyError):
             raise Bf3FileFormatError("Invalid Bf2 File Format")
         finally:
-            if is_file_path:
+            if isinstance(bf2file, str):
                 bf2fileobj.close()
         for instr, params in bf2_objs:
             if instr == "load":
