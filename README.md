@@ -20,7 +20,11 @@ uv add git+https://github.com/baltech-ag/bec2format.git@v1.04.00
 #### MicroPython
 
 * Compatible with [MicroPython](https://micropython.org/) >= 1.20.0
-* Tested with the [Unix port](https://github.com/micropython/micropython/tree/v1.20.0/ports/unix) on Ubuntu 20.04
+* Tested with the Unix port:
+  * [v1.20.0](https://github.com/micropython/micropython/tree/v1.20.0/ports/unix) on Ubuntu 20.04
+  * [v1.24.1](https://github.com/micropython/micropython/tree/v1.24.1/ports/unix) on Ubuntu 24.04
+  * [v1.25.0](https://github.com/micropython/micropython/tree/v1.25.0/ports/unix) on Ubuntu 24.04
+  * [v1.29.0](https://github.com/micropython/micropython/tree/v1.29.0/ports/unix) on Ubuntu 26.04
 
 ```python
 import mip

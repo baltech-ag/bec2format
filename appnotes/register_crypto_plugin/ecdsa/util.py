@@ -14,7 +14,9 @@ PY2 = False
 
 
 def b(s: str) -> bytes:
-    return s.encode("latin-1")
+    # latin-1 like six.b, without the codec: MicroPython >= 1.29 only accepts
+    # "utf-8"/"ascii" (older versions silently encoded "latin-1" as UTF-8)
+    return bytes(ord(c) for c in s)
 
 
 def int2byte(i: int) -> bytes:

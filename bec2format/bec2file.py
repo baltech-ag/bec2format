@@ -147,12 +147,12 @@ class SoftwareCustKeyEncryptor(AesEncryptorMixin, CustKeyEncryptor):
         self.customer_key_pos = customer_key_pos
 
     def encrypt(self, plaintext: bytes):
+        buffer = bytearray(plaintext)
         if self.customer_key and self.customer_key_pos:
-            plaintext = bytearray(plaintext)
-            plaintext[
+            buffer[
                 self.customer_key_pos : self.customer_key_pos + CUSTOMER_KEY_SIZE
             ] = self.customer_key
-        return super().encrypt(bytes(plaintext))
+        return super().encrypt(bytes(buffer))
 
     def decrypt(self, ciphertext):
         plaintext = super().decrypt(ciphertext)

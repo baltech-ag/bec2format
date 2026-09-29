@@ -3,31 +3,31 @@ on:
   push:
 jobs:
   test:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Setup uv (manages Python via .python-version)
-        uses: astral-sh/setup-uv@v8.1.0
+        uses: astral-sh/setup-uv@v10.2.0
         with:
           enable-cache: true
       - name: Run unit tests
         run: uv run --all-extras inv test
   lint:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Setup uv (manages Python via .python-version)
-        uses: astral-sh/setup-uv@v8.1.0
+        uses: astral-sh/setup-uv@v10.2.0
         with:
           enable-cache: true
       - name: Run linters (ruff, mypy, lock file check)
         run: uv run --all-extras inv lint
   verify:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     env:
-      micropython_tag: 'v1.25.0'
+      micropython_tag: 'v1.29.0'
     strategy:
       matrix:
         interpreter:
@@ -40,10 +40,10 @@ jobs:
           - verify_dh_secret.py
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Setup uv (manages Python via .python-version)
         if: ${{ matrix.interpreter == '.venv/bin/python' }}
-        uses: astral-sh/setup-uv@v8.1.0
+        uses: astral-sh/setup-uv@v10.2.0
         with:
           enable-cache: true
       - name: Install bec2format for Python
