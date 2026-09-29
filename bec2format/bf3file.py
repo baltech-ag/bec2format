@@ -787,8 +787,3 @@ class Bf3File:
             self.comments.pop("DeviceSettings", "")
         else:
             self.comments["DeviceSettings"] = str(dev_settings_id)
-
-        if config.get((0x0620, 0x20), 0):
-            self.comments["RequiresBusAddress"] = "Yes"
-        else:
-            self.comments.pop("RequiresBusAddress", "")
