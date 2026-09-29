@@ -397,8 +397,9 @@ class Bf3File:
                 tag_value = description_rdr.read(tag_len)
                 if tag_id in description:
                     raise Bf3FileFormatError(
-                        "TagID {:02X} is contained twice in "
-                        "BF3 component".format(tag_id)
+                        "TagID {:02X} is contained twice in BF3 component".format(
+                            tag_id
+                        )
                     )
                 description[tag_id] = tag_value
             description_rdr.ensure_eof()
